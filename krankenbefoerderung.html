@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tawano — Telefonservice für Krankenbeförderung &amp; Disposition</title>
+<meta name="description" content="KI-Telefonassistent für Krankenfahrten. Patientendaten, Adressen, Transportart und Wunschtermin — strukturiert für Ihre Disposition.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#FAFAF9;color:#1A1A1A;line-height:1.6;-webkit-font-smoothing:antialiased}
+nav{background:#fff;border-bottom:1px solid #E5E5E3;padding:16px 0;position:sticky;top:0;z-index:100}
+.nav-wrap{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:20px;font-weight:700;color:#1A1A1A;text-decoration:none}
+.logo span{color:#1D4ED8}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{font-size:14px;color:#525252;text-decoration:none;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:#1A1A1A}
+.nav-btn{padding:10px 22px;background:#1D4ED8;color:#fff;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:background .2s}
+.nav-btn:hover{background:#1E40AF}
+.hero{max-width:780px;margin:0 auto;padding:64px 24px 56px;text-align:center}
+.hero-tag{display:inline-block;background:#EFF6FF;border:1px solid #BFDBFE;color:#1D4ED8;font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px;margin-bottom:24px}
+.hero h1{font-size:clamp(36px,5.5vw,56px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;color:#0A0A0A;margin-bottom:18px}
+.hero-sub{font-size:18px;color:#57534E;line-height:1.6;margin-bottom:40px;font-weight:400}
+.call-wrap{max-width:470px;margin:0 auto 20px;background:#fff;border:1px solid #E7E5E4;border-radius:14px;padding:24px;box-shadow:0 16px 40px rgba(0,0,0,.06)}
+.call-label{font-size:14px;font-weight:800;color:#111827;margin-bottom:14px;text-align:left;letter-spacing:-0.2px}
+.phone-row{display:flex;gap:8px;margin-bottom:12px}
+.country{padding:0 16px;background:#F8FAFC;border:1.5px solid #E5E7EB;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:#374151;min-height:50px}
+.phone-in{flex:1;padding:13px 16px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:15px;color:#374151;font-family:'Inter',sans-serif;outline:none;background:#FDFDFC;transition:border .2s,box-shadow .2s}
+.phone-in::placeholder{color:#9CA3AF}
+.phone-in:focus{border-color:#1D4ED8;box-shadow:0 0 0 4px rgba(4,120,87,.08)}
+.btn-call{width:100%;padding:14px;background:#1D4ED8;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s}
+.btn-call:hover:not(:disabled){background:#1E40AF}
+.btn-call:disabled{opacity:.6;cursor:not-allowed}
+.btn-end{width:100%;padding:12px;background:#fff;color:#B91C1C;border:1.5px solid #FCA5A5;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-top:8px;display:none;transition:background .2s}
+.btn-end:hover{background:#FEF2F2}
+.call-msg{font-size:13px;margin-top:10px;display:none;font-weight:600;line-height:1.5}
+.call-msg.success{color:#1D4ED8}
+.call-msg.error{color:#B91C1C}
+.call-msg.loading{color:#525252}
+.demo-link{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:#111827;font-weight:700;text-decoration:none;margin-bottom:36px;border-bottom:1px solid #D6D3D1;padding-bottom:2px;transition:opacity .2s;cursor:pointer}
+.demo-link:hover{opacity:.75}
+.trust-row{display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;font-size:13px;color:#737373}
+.trust-row span{display:inline-flex;align-items:center}
+.trust-row svg{width:14px;height:14px;stroke:#1D4ED8;fill:none;stroke-width:2;stroke-linecap:round;margin-right:5px}
+section{padding:72px 24px}
+.sec-wrap{max-width:1100px;margin:0 auto}
+.sec-top{text-align:center;margin-bottom:48px}
+.sec-tag{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#737373;margin-bottom:12px}
+.sec-h2{font-size:clamp(28px,4vw,42px);font-weight:800;line-height:1.15;letter-spacing:-1px;color:#0A0A0A;margin-bottom:12px}
+.sec-sub{font-size:16px;color:#525252;max-width:560px;margin:0 auto}
+.stats{background:#fff;border-top:1px solid #E5E5E3;border-bottom:1px solid #E5E5E3;padding:40px 24px}
+.stats-inner{max-width:900px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;flex-wrap:wrap;gap:32px}
+.stat{text-align:center}
+.stat-num{font-size:36px;font-weight:800;letter-spacing:-1.5px;color:#0A0A0A}
+.stat-label{font-size:12px;color:#737373;margin-top:4px}
+.notice{max-width:1000px;margin:0 auto;padding:0 24px}
+.notice-box{background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;padding:20px 24px;display:flex;gap:14px;align-items:flex-start}
+.notice-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.notice-box h3{font-size:15px;font-weight:700;color:#B91C1C;margin-bottom:6px}
+.notice-box p{font-size:14px;color:#7F1D1D;line-height:1.6}
+.problem-sec{background:#171717;color:#fff}
+.problem-sec .sec-tag{color:#60A5FA}
+.problem-sec .sec-h2{color:#fff}
+.problem-sec .sec-sub{color:#D4D4D4}
+.prob-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:48px}
+.prob-card{background:#242424;border:1px solid #3A3A3A;border-radius:12px;padding:32px 24px;box-shadow:0 20px 45px rgba(0,0,0,.18)}
+.prob-num{font-size:52px;font-weight:800;letter-spacing:-2px;line-height:1;margin-bottom:16px}
+.prob-num.bad{color:#FB923C}
+.prob-num.good{color:#60A5FA}
+.prob-card h3{font-size:17px;font-weight:700;margin-bottom:10px;color:#fff}
+.prob-card p{font-size:14px;color:#D4D4D4;line-height:1.65}
+.scen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:48px}
+.scen-card{background:#fff;border:2px solid #E5E5E3;border-radius:10px;padding:22px 18px;transition:border .2s;text-align:center}
+.scen-card:hover{border-color:#1D4ED8}
+.scen-icon{font-size:28px;margin-bottom:12px}
+.scen-card h3{font-size:14px;font-weight:700;margin-bottom:4px;color:#1A1A1A}
+.scen-card p{font-size:12px;color:#737373;line-height:1.5}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:48px}
+.feat-card{background:#fff;border:1px solid #E5E5E3;border-radius:12px;padding:24px 22px;transition:border .2s,transform .2s}
+.feat-card:hover{border-color:#1D4ED8;transform:translateY(-2px)}
+.feat-icon{width:42px;height:42px;background:#EFF6FF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.feat-card h3{font-size:15px;font-weight:700;margin-bottom:6px;color:#1A1A1A}
+.feat-card p{font-size:13px;color:#737373;line-height:1.6}
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;margin-top:48px}
+.step-box{text-align:center}
+.step-num{width:48px;height:48px;background:#EFF6FF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#1D4ED8;margin:0 auto 16px}
+.step-box h3{font-size:16px;font-weight:700;margin-bottom:8px;color:#1A1A1A}
+.step-box p{font-size:14px;color:#737373;line-height:1.6}
+.live-sec{background:#1A1A1A;border-radius:16px;margin:0 24px;overflow:hidden}
+.live-inner{max-width:1100px;margin:0 auto;padding:64px 48px;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.live-left h2{font-size:clamp(26px,3.5vw,38px);font-weight:800;letter-spacing:-1px;color:#fff;margin-bottom:16px;line-height:1.15}
+.live-left p{font-size:16px;color:#D4D4D4;line-height:1.65;margin-bottom:28px}
+.check-item{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:#F5F5F4;margin-bottom:10px}
+.check-item::before{content:'✓';color:#3B82F6;font-weight:700;font-size:15px;flex-shrink:0}
+.form-container{background:#262626;border-radius:12px;padding:28px;border:1px solid #404040}
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:12px;font-weight:700;color:#D4D4D4;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.form-input{width:100%;padding:12px 14px;background:#151515;border:1px solid #4A4A4A;border-radius:8px;color:#fff;font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border .2s}
+.form-input::placeholder{color:#737373}
+.form-input:focus{border-color:#3B82F6}
+.form-check{display:flex;align-items:flex-start;gap:8px;margin-bottom:16px}
+.form-check input{margin-top:3px;accent-color:#1D4ED8}
+.form-check label{font-size:12px;color:#D4D4D4;line-height:1.5}
+.form-check a{color:#fff;cursor:pointer}
+.btn-submit{width:100%;padding:14px;background:#1D4ED8;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;text-decoration:none;display:block;text-align:center}
+.btn-submit:hover{background:#1E40AF}
+.form-done{display:none;text-align:center;padding:32px 16px}
+.form-done-icon{font-size:40px;margin-bottom:12px}
+.form-done p{color:#3B82F6;font-size:16px;font-weight:600;margin-bottom:6px}
+.form-done small{color:#D4D4D4;font-size:13px;line-height:1.6;display:block}
+.final{text-align:center;padding:88px 24px}
+.final h2{font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-1.5px;margin-bottom:16px;color:#0A0A0A}
+.final p{font-size:17px;color:#525252;margin-bottom:36px}
+.final-btns{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.btn-final-primary{padding:16px 36px;background:#1D4ED8;color:#fff;border-radius:8px;font-size:16px;font-weight:700;text-decoration:none;transition:background .2s;font-family:'Inter',sans-serif;cursor:pointer;border:none}
+.btn-final-primary:hover{background:#1E40AF}
+.btn-final-secondary{padding:16px 28px;border:2px solid #E5E5E3;color:#525252;border-radius:8px;font-size:16px;font-weight:500;text-decoration:none;transition:all .2s;font-family:'Inter',sans-serif;background:#fff}
+.btn-final-secondary:hover{border-color:#1A1A1A;color:#1A1A1A}
+footer{background:#fff;border-top:1px solid #E5E5E3;padding:28px 24px}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+footer p{font-size:13px;color:#A3A3A3}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap}
+.footer-links a{font-size:13px;color:#A3A3A3;text-decoration:none;transition:color .2s;cursor:pointer}
+.footer-links a:hover{color:#1A1A1A}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000}
+.modal-box{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(680px,92vw);max-height:85vh;overflow-y:auto;background:#fff;border-radius:14px;z-index:1001;padding:44px 40px 36px}
+.modal-close{position:absolute;top:16px;right:18px;background:none;border:none;font-size:22px;cursor:pointer;color:#9CA3AF;line-height:1;transition:color .2s}
+.modal-close:hover{color:#1A1A1A}
+.modal-h1{font-size:22px;font-weight:800;color:#0A0A0A;margin-bottom:6px;letter-spacing:-0.5px}
+.modal-date{font-size:12px;color:#9CA3AF;margin-bottom:28px}
+.modal-h2{font-size:15px;font-weight:700;color:#1A1A1A;margin:20px 0 6px}
+.modal-p{font-size:14px;color:#525252;line-height:1.75;margin-bottom:4px}
+.modal-p a{color:#1D4ED8}
+.modal-list{margin:8px 0 8px 18px;color:#525252}
+.modal-list li{margin-bottom:6px;line-height:1.7;font-size:14px}
+@media(max-width:680px){
+  .live-inner{grid-template-columns:1fr;padding:40px 24px;gap:36px}
+  .live-sec{margin:0 12px}
+  .phone-row{flex-direction:column}
+  .modal-box{padding:32px 24px 28px}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-wrap">
+    <a href="/tawano" class="logo">tawa<span>no</span></a>
+    <div class="nav-links">
+      <a href="/tawano">Tawano</a>
+      <a href="/handwerker">Handwerk</a>
+      <a href="#live" class="nav-btn">Demo buchen</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag">Live Demo · Punkt24 Krankenbeförderung</div>
+  <h1>Fahrtanfragen ruhig und vollständig aufnehmen — auch wenn die Disposition voll ist.</h1>
+  <p class="hero-sub">KI-Assistent für Krankenfahrten: Patientendaten, Adressen, Transportart und Wunschtermin — strukturiert und zuverlässig erfasst, direkt für die Disposition.</p>
+  <div class="call-wrap">
+    <div class="call-label">Live-Test: Lassen Sie sich jetzt direkt anrufen</div>
+    <div class="phone-row">
+      <div class="country">🇩🇪 +49</div>
+      <input type="tel" class="phone-in" id="phone" placeholder="Telefonnummer eingeben">
+    </div>
+    <button class="btn-call" id="callBtn" onclick="triggerCall()">Jetzt Testanruf erhalten →</button>
+    <button class="btn-end" id="endBtn" onclick="endCall()">Anruf beenden</button>
+    <div id="callMsg" class="call-msg"></div>
+  </div>
+  <a class="demo-link" onclick="document.getElementById('live').scrollIntoView({behavior:'smooth'})">📅 Direkt Demo buchen →</a>
+  <div class="trust-row">
+    <span><svg viewBox="0 0 16 16"><path d="M13.5 4.5l-7.5 7.5-3.5-3.5"/></svg>Mo–Fr 6–20 Uhr</span>
+    <span><svg viewBox="0 0 16 16"><path d="M13.5 4.5l-7.5 7.5-3.5-3.5"/></svg>Düsseldorf &amp; Umgebung</span>
+    <span><svg viewBox="0 0 16 16"><path d="M13.5 4.5l-7.5 7.5-3.5-3.5"/></svg>Kein Rettungsdienst</span>
+  </div>
+</section>
+
+<div class="notice">
+  <div class="notice-box">
+    <span class="notice-icon">🚨</span>
+    <div>
+      <h3>Wichtig: Kein Rettungsdienst</h3>
+      <p>Bei lebensbedrohlichen Notfällen wählen Sie bitte sofort die <strong>112</strong>. Dieser Assistent ist ausschließlich für planbare Krankenfahrten und Disposition.</p>
+    </div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Anrufe angenommen</div></div>
+    <div class="stat"><div class="stat-num">0</div><div class="stat-label">Wartezeiten</div></div>
+    <div class="stat"><div class="stat-num">1x</div><div class="stat-label">Strukturierte Übergabe</div></div>
+  </div>
+</div>
+
+<section class="problem-sec">
+  <div class="sec-wrap">
+    <div class="sec-top">
+      <div class="sec-tag">Das Problem</div>
+      <h2 class="sec-h2">Disposition voll — Anrufer warten in der Leitung.</h2>
+      <p class="sec-sub">Wer einen Krankentransport bucht, ist oft gestresst oder unsicher. Eine Warteschleife ist keine Lösung.</p>
+    </div>
+    <div class="prob-grid">
+      <div class="prob-card"><div class="prob-num bad">3 Min.</div><h3>Durchschnittliche Wartezeit</h3><p>Wenn die Leitung belegt ist, legt jeder zweite Anrufer auf — und ruft beim nächsten Anbieter an.</p></div>
+      <div class="prob-card"><div class="prob-num bad">unvollständig</div><h3>Daten fehlen oft</h3><p>Im Stress vergessen Anrufer oft Adresse, Treppenanzahl oder Hilfsbedarf. Die Disposition muss zurückrufen.</p></div>
+      <div class="prob-card"><div class="prob-num good">100%</div><h3>Lösbar</h3><p>Ein Assistent, der ruhig und vollständig aufnimmt — strukturiert für die Disposition. Keine Hektik, keine Lücken.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-wrap">
+    <div class="sec-top">
+      <div class="sec-tag">Transportarten</div>
+      <h2 class="sec-h2">Welche Beförderung wird benötigt?</h2>
+      <p class="sec-sub">Der Assistent klärt die passende Transportart — ruhig, ohne den Anrufer zu drängen.</p>
+    </div>
+    <div class="scen-grid">
+      <div class="scen-card"><div class="scen-icon">🪑</div><h3>Sitzend</h3><p>Selbstständig sitzen und einsteigen</p></div>
+      <div class="scen-card"><div class="scen-icon">♿</div><h3>Rollstuhl</h3><p>Beförderung im eigenen Rollstuhl</p></div>
+      <div class="scen-card"><div class="scen-icon">🛏️</div><h3>Liegend</h3><p>Liegendtransport mit Trage</p></div>
+      <div class="scen-card"><div class="scen-icon">🪜</div><h3>Tragestuhl</h3><p>Für Treppen ohne Aufzug</p></div>
+      <div class="scen-card"><div class="scen-icon">🔁</div><h3>Serienfahrten</h3><p>Dialyse, Therapie, regelmäßig</p></div>
+      <div class="scen-card"><div class="scen-icon">🏥</div><h3>Entlassung</h3><p>Klinikentlassung nach Hause</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="background:#F5F5F4">
+  <div class="sec-wrap">
+    <div class="sec-top">
+      <div class="sec-tag">Was der Assistent aufnimmt</div>
+      <h2 class="sec-h2">Vollständige Fahrtdaten — strukturiert für die Disposition.</h2>
+      <p class="sec-sub">Nach dem Gespräch hat die Disposition alles, was für die Fahrtplanung nötig ist.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-icon">👤</div><h3>Patientenname</h3><p>Klar aufgenommen, bei unklarer Aussprache buchstabiert — inklusive Bestätigung.</p></div>
+      <div class="feat-card"><div class="feat-icon">📍</div><h3>Ab- und Zieladresse</h3><p>Straße, Hausnummer, Ort. Klinik, Station, Zimmer wenn bekannt.</p></div>
+      <div class="feat-card"><div class="feat-icon">🗓️</div><h3>Datum &amp; Uhrzeit</h3><p>Terminzeit oder gewünschte Abholzeit — die Disposition prüft die passende Abfahrt.</p></div>
+      <div class="feat-card"><div class="feat-icon">♿</div><h3>Transportart &amp; Hilfsbedarf</h3><p>Sitzend, Rollstuhl, liegend oder Tragestuhl. Treppen, Aufzug, besondere Hinweise.</p></div>
+      <div class="feat-card"><div class="feat-icon">📞</div><h3>Rückrufnummer</h3><p>Vollständig aufgenommen für Rückfragen der Disposition oder des Fahrers.</p></div>
+      <div class="feat-card"><div class="feat-icon">📋</div><h3>Strukturierte Übergabe</h3><p>Komplette Anfrage direkt im Disposition-Dashboard — bereit zur Zuordnung an einen Fahrer.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-wrap">
+    <div class="sec-top">
+      <div class="sec-tag">So läuft es ab</div>
+      <h2 class="sec-h2">Vier Schritte bis zur Fahrt.</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-box"><div class="step-num">01</div><h3>Anruf geht ein</h3><p>Der Assistent hebt sofort ab — auch wenn die Disposition gerade andere Gespräche führt.</p></div>
+      <div class="step-box"><div class="step-num">02</div><h3>Daten aufnehmen</h3><p>Patient, Adressen, Transportart, Wunschtermin — eine Frage pro Antwort, ruhig und klar.</p></div>
+      <div class="step-box"><div class="step-num">03</div><h3>Disposition bekommt Übergabe</h3><p>Komplette Anfrage strukturiert im Dashboard. Disposition prüft Verfügbarkeit und bestätigt.</p></div>
+      <div class="step-box"><div class="step-num">04</div><h3>Bestätigung an Patient</h3><p>Der Patient erhält die Bestätigung der Fahrt — Disposition bleibt entlastet.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="live">
+  <div class="sec-wrap">
+    <div class="live-sec">
+      <div class="live-inner">
+        <div class="live-left">
+          <h2>Buchen Sie eine kurze Demo — wir zeigen Ihnen den Assistenten live.</h2>
+          <p>Der Testanruf bleibt oben auf der Seite. In diesem Bereich geht es darum, direkt einen 15-Minuten-Termin mit uns zu buchen.</p>
+          <div class="check-item">Kurze Demo statt langer Beratung</div>
+          <div class="check-item">Sie sehen, wie der Assistent eine Fahrtanfrage aufnimmt</div>
+          <div class="check-item">Danach wissen Sie sofort, ob es für Ihre Disposition passt</div>
+        </div>
+        <div>
+          <div class="form-container">
+            <div id="form-fields">
+              <div class="form-group"><label class="form-label">Ihr Name</label><input type="text" class="form-input" id="name" placeholder="Max Mustermann"></div>
+              <div class="form-group"><label class="form-label">Unternehmen</label><input type="text" class="form-input" id="company" placeholder="Krankenfahrten Muster GmbH"></div>
+              <div class="form-group"><label class="form-label">E-Mail-Adresse</label><input type="email" class="form-input" id="email" placeholder="name@firma.de"></div>
+              <div class="form-check">
+                <input type="checkbox" id="agree">
+                <label for="agree">Ich habe die <a onclick="openModal('datenschutz');return false;">Datenschutzerklärung</a> gelesen und stimme der Kontaktaufnahme zur Demo-Buchung zu.</label>
+              </div>
+              <button class="btn-submit" onclick="bookDemo()">15-Minuten-Demo buchen →</button>
+            </div>
+            <div class="form-done" id="done">
+              <div class="form-done-icon">📅</div>
+              <p>Danke, <span id="done-name"></span>!</p>
+              <small>Wir melden uns zeitnah bei Ihnen, um einen Termin abzustimmen.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="sec-wrap">
+    <h2>Entlasten Sie Ihre Disposition.</h2>
+    <p>15 Minuten. Konkrete Live-Demo.</p>
+    <div class="final-btns">
+      <button class="btn-final-primary" onclick="document.getElementById('live').scrollIntoView({behavior:'smooth'})">15-Minuten-Demo buchen →</button>
+      <a href="mailto:info@tawano.de" class="btn-final-secondary">info@tawano.de</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <a href="/tawano" class="logo">tawa<span>no</span></a>
+    <p>Demo: Punkt24 Krankenbeförderung — KI-Telefonassistent</p>
+    <div class="footer-links">
+      <a onclick="openModal('impressum');return false;">Impressum</a>
+      <a onclick="openModal('datenschutz');return false;">Datenschutz</a>
+      <a href="mailto:info@tawano.de">info@tawano.de</a>
+    </div>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal()"></div>
+<div class="modal-box" id="modal-box">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+  <div id="modal-content"></div>
+</div>
+
+<div id="impressum-data" style="display:none">
+  <div class="modal-h1">Impressum</div>
+  <div class="modal-date">Angaben gemäß § 5 DDG</div>
+  <div class="modal-h2">Anbieter dieser Website</div>
+  <p class="modal-p">Jamal Kamal<br>handelnd unter „Tawano"<br>Erkrather Str. 401<br>40231 Düsseldorf<br>Deutschland</p>
+  <div class="modal-h2">Kontakt</div>
+  <p class="modal-p">E-Mail: <a href="mailto:info@tawano.de">info@tawano.de</a></p>
+  <div class="modal-h2">Hinweis zur Anbieterstellung</div>
+  <p class="modal-p">„Tawano" ist die Geschäftsbezeichnung des Website-Angebots. Vertragspartner und verantwortlicher Anbieter dieser Website ist Jamal Kamal.</p>
+  <div class="modal-h2">Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</div>
+  <p class="modal-p">Jamal Kamal<br>Erkrather Str. 401<br>40231 Düsseldorf<br>Deutschland</p>
+  <div class="modal-h2">Hinweis zur Streitbeilegung</div>
+  <p class="modal-p">Unsere Leistungen richten sich ausschließlich an Unternehmer im Sinne des § 14 BGB. Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+  <div class="modal-h2">Haftung für Inhalte / Links / Urheberrecht</div>
+  <p class="modal-p">Als Diensteanbieter sind wir für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Für externe Links ist stets der jeweilige Anbieter verantwortlich. Die durch Tawano bzw. Jamal Kamal erstellten Inhalte unterliegen dem deutschen Urheberrecht.</p>
+</div>
+
+<div id="datenschutz-data" style="display:none">
+  <div class="modal-h1">Datenschutzerklärung</div>
+  <div class="modal-date">Stand: April 2026</div>
+  <div class="modal-h2">1. Verantwortlicher</div>
+  <p class="modal-p">Jamal Kamal · handelnd unter „Tawano" · Erkrather Str. 401, 40231 Düsseldorf · <a href="mailto:info@tawano.de">info@tawano.de</a></p>
+  <div class="modal-h2">2. Allgemeine Hinweise</div>
+  <p class="modal-p">Wir verarbeiten personenbezogene Daten nur, soweit dies zur Bereitstellung unserer Website, zur Bearbeitung von Anfragen und zur Erbringung unserer Leistungen erforderlich ist. Rechtsgrundlagen: Art. 6 Abs. 1 lit. a, b, c, f DSGVO.</p>
+  <div class="modal-h2">3. Hosting / CDN / Sicherheit</div>
+  <p class="modal-p">Beim Aufruf der Website werden technisch erforderliche Verbindungs- und Zugriffsdaten verarbeitet (insb. IP-Adresse, Zeitpunkt, Browser, aufgerufene Seiten). Zur Absicherung und beschleunigten Auslieferung kann Cloudflare zum Einsatz kommen. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.</p>
+  <div class="modal-h2">4. Live-Testanruf (Sprach-Demo)</div>
+  <p class="modal-p">Sie können auf dieser Seite einen Testanruf unseres KI-Telefonassistenten auslösen. Wir verarbeiten die eingegebene Telefonnummer ausschließlich, um den ausgehenden Demo-Anruf an Sie aufzubauen. Im Rahmen des Anrufs verarbeiten wir Verbindungs- und Audiodaten sowie Transkripte zur Funktion des Assistenten und zur Qualitätssicherung. Eingesetzte Dienstleister: Twilio (Telefonie), Deepgram (Spracherkennung), KI-Sprachmodell. Rechtsgrundlage: Art. 6 Abs. 1 lit. b und f DSGVO.</p>
+  <div class="modal-h2">5. Demo-Buchungsformular</div>
+  <p class="modal-p">Über das Demo-Formular verarbeiten wir Name, Firma und E-Mail-Adresse zur Bearbeitung Ihrer Anfrage. Rechtsgrundlage: Art. 6 Abs. 1 lit. b und f DSGVO.</p>
+  <div class="modal-h2">6. Empfänger / Drittland</div>
+  <p class="modal-p">Personenbezogene Daten können an technische Dienstleister weitergegeben werden, soweit dies erforderlich ist (Hosting, CDN, Telefonie, KI). Eine Verarbeitung in Drittländern (insb. USA) ist nicht ausgeschlossen; wir achten auf geeignete Garantien (Art. 46 DSGVO).</p>
+  <div class="modal-h2">7. Speicherdauer</div>
+  <p class="modal-p">Wir speichern personenbezogene Daten nur so lange, wie dies für die jeweiligen Zwecke erforderlich ist, sofern keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
+  <div class="modal-h2">8. Ihre Rechte</div>
+  <p class="modal-p">Sie haben Recht auf Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragbarkeit, Widerspruch und Widerruf erteilter Einwilligungen. Anfragen an: <a href="mailto:info@tawano.de">info@tawano.de</a></p>
+  <div class="modal-h2">9. Beschwerderecht</div>
+  <p class="modal-p">Zuständige Aufsichtsbehörde: Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen, Kavalleriestraße 2–4, 40213 Düsseldorf, <a href="mailto:poststelle@ldi.nrw.de">poststelle@ldi.nrw.de</a></p>
+</div>
+
+<script>
+var AGENT_ID = 'punkt24-demo';
+var API_BASE = 'https://pointless-jacket-reshape.ngrok-free.dev';
+var _callSid = null;
+
+function normPhone(raw){
+  var p=(raw||'').replace(/[\s\-\(\)\/\.]/g,'');
+  if(p.startsWith('0049')) p='+49'+p.slice(4);
+  else if(p.startsWith('0')&&!p.startsWith('00')) p='+49'+p.slice(1);
+  else if(!p.startsWith('+')&&p.length>=8) p='+49'+p;
+  return /^\+[1-9]\d{7,14}$/.test(p)?p:null;
+}
+
+async function triggerCall(){
+  var input=document.getElementById('phone'),btn=document.getElementById('callBtn'),endBtn=document.getElementById('endBtn'),msg=document.getElementById('callMsg');
+  var phone=normPhone((input.value||'').trim());
+  if(!phone){msg.className='call-msg error';msg.style.display='block';msg.textContent='Bitte eine gültige Telefonnummer eingeben.';input.focus();return;}
+  btn.disabled=true;msg.className='call-msg loading';msg.style.display='block';msg.textContent='Anruf wird aufgebaut…';
+  try{
+    var res=await fetch(API_BASE+'/api/call',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agentId:AGENT_ID,phoneNumber:phone})});
+    var data=await res.json();
+    if(data.ok){
+      _callSid=data.callSid||null;
+      msg.className='call-msg success';msg.textContent='✓ Wir rufen Sie in wenigen Sekunden an. Bitte nehmen Sie ab!';
+      btn.textContent='Anruf läuft…';endBtn.style.display='block';
+    } else {
+      msg.className='call-msg error';msg.textContent='Fehler: '+(data.message||'Anruf konnte nicht gestartet werden.');btn.disabled=false;
+    }
+  } catch(e){
+    msg.className='call-msg error';msg.textContent='Verbindungsfehler. Bitte versuchen Sie es erneut.';btn.disabled=false;
+  }
+}
+
+async function endCall(){
+  var endBtn=document.getElementById('endBtn'),btn=document.getElementById('callBtn'),msg=document.getElementById('callMsg');
+  if(_callSid){try{await fetch(API_BASE+'/api/call/'+_callSid+'/end',{method:'POST'});}catch(e){} _callSid=null;}
+  endBtn.style.display='none';btn.disabled=false;btn.textContent='Jetzt Testanruf erhalten →';
+  msg.className='call-msg';msg.style.display='block';msg.textContent='Anruf beendet.';
+  setTimeout(function(){msg.style.display='none';},3000);
+}
+
+function bookDemo(){
+  var n=document.getElementById('name').value.trim();
+  var c=document.getElementById('company').value.trim();
+  var e=document.getElementById('email').value.trim();
+  var a=document.getElementById('agree').checked;
+  if(!n||!c||!e){alert('Bitte Name, Firma und E-Mail-Adresse eingeben.');return;}
+  if(!a){alert('Bitte Datenschutz bestätigen.');return;}
+  document.getElementById('form-fields').style.display='none';
+  document.getElementById('done').style.display='block';
+  document.getElementById('done-name').textContent=n.split(' ')[0];
+}
+
+function openModal(id){
+  document.getElementById('modal-content').innerHTML=document.getElementById(id+'-data').innerHTML;
+  document.getElementById('modal-overlay').style.display='block';
+  document.getElementById('modal-box').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('modal-overlay').style.display='none';
+  document.getElementById('modal-box').style.display='none';
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click',function(e){
+    var t=document.querySelector(a.getAttribute('href'));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}
+  });
+});
+</script>
+</body>
+</html>

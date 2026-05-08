@@ -163,13 +163,15 @@ footer p{font-size:13px;color:#A3A3A3}
   <h1>Fahrtanfragen ruhig und vollständig aufnehmen — auch wenn die Disposition voll ist.</h1>
   <p class="hero-sub">KI-Assistent für Krankenfahrten: Patientendaten, Adressen, Transportart und Wunschtermin — strukturiert und zuverlässig erfasst, direkt für die Disposition.</p>
   <div class="call-wrap">
-    <div class="call-label">Live-Test: Lassen Sie sich jetzt direkt anrufen</div>
-    <div class="phone-row">
-      <div class="country">🇩🇪 +49</div>
-      <input type="tel" class="phone-in" id="phone" placeholder="Telefonnummer eingeben">
+    <div class="call-label">Echtes Demo-Gespräch anhören</div>
+    <button class="btn-call" id="callBtn" onclick="toggleAudio()">▶ Demo-Gespräch abspielen</button>
+    <div id="audioWrap" style="display:none;margin-top:14px;">
+      <audio id="demoAudio" controls style="width:100%;border-radius:8px;accent-color:#6c47ff;">
+        <source src="audio/kranken-demo.mp3" type="audio/mpeg">
+        Ihr Browser unterstützt kein Audio-Playback.
+      </audio>
+      <div style="font-size:12px;color:#888;margin-top:6px;">Demo-Gespräch: KI-Assistent nimmt eine Fahrtanfrage für Punkt24 entgegen</div>
     </div>
-    <button class="btn-call" id="callBtn" onclick="triggerCall()">Jetzt Testanruf erhalten →</button>
-    <button class="btn-end" id="endBtn" onclick="endCall()">Anruf beenden</button>
     <div id="callMsg" class="call-msg"></div>
   </div>
   <a class="demo-link" onclick="document.getElementById('live').scrollIntoView({behavior:'smooth'})">📅 Direkt Demo buchen →</a>
@@ -281,11 +283,12 @@ footer p{font-size:13px;color:#A3A3A3}
               <div class="form-group"><label class="form-label">Ihr Name</label><input type="text" class="form-input" id="name" placeholder="Max Mustermann"></div>
               <div class="form-group"><label class="form-label">Unternehmen</label><input type="text" class="form-input" id="company" placeholder="Krankenfahrten Muster GmbH"></div>
               <div class="form-group"><label class="form-label">E-Mail-Adresse</label><input type="email" class="form-input" id="email" placeholder="name@firma.de"></div>
+              <div class="form-group"><label class="form-label">Nachricht (optional)</label><textarea class="form-input" id="message" placeholder="Was sollen wir über Ihre Disposition wissen?" style="min-height:90px;resize:vertical"></textarea></div>
               <div class="form-check">
                 <input type="checkbox" id="agree">
                 <label for="agree">Ich habe die <a onclick="openModal('datenschutz');return false;">Datenschutzerklärung</a> gelesen und stimme der Kontaktaufnahme zur Demo-Buchung zu.</label>
               </div>
-              <button class="btn-submit" onclick="bookDemo()">15-Minuten-Demo buchen →</button>
+              <button class="btn-submit" id="bookBtn" onclick="bookDemo()">15-Minuten-Demo buchen →</button>
             </div>
             <div class="form-done" id="done">
               <div class="form-done-icon">📅</div>
@@ -369,56 +372,46 @@ footer p{font-size:13px;color:#A3A3A3}
 </div>
 
 <script>
-var AGENT_ID = 'punkt24-demo';
-var API_BASE = 'https://pointless-jacket-reshape.ngrok-free.dev';
-var _callSid = null;
+var BOOKING_API_BASE=(location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:8787':'';
 
-function normPhone(raw){
-  var p=(raw||'').replace(/[\s\-\(\)\/\.]/g,'');
-  if(p.startsWith('0049')) p='+49'+p.slice(4);
-  else if(p.startsWith('0')&&!p.startsWith('00')) p='+49'+p.slice(1);
-  else if(!p.startsWith('+')&&p.length>=8) p='+49'+p;
-  return /^\+[1-9]\d{7,14}$/.test(p)?p:null;
-}
-
-async function triggerCall(){
-  var input=document.getElementById('phone'),btn=document.getElementById('callBtn'),endBtn=document.getElementById('endBtn'),msg=document.getElementById('callMsg');
-  var phone=normPhone((input.value||'').trim());
-  if(!phone){msg.className='call-msg error';msg.style.display='block';msg.textContent='Bitte eine gültige Telefonnummer eingeben.';input.focus();return;}
-  btn.disabled=true;msg.className='call-msg loading';msg.style.display='block';msg.textContent='Anruf wird aufgebaut…';
-  try{
-    var res=await fetch(API_BASE+'/api/call',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agentId:AGENT_ID,phoneNumber:phone})});
-    var data=await res.json();
-    if(data.ok){
-      _callSid=data.callSid||null;
-      msg.className='call-msg success';msg.textContent='✓ Wir rufen Sie in wenigen Sekunden an. Bitte nehmen Sie ab!';
-      btn.textContent='Anruf läuft…';endBtn.style.display='block';
-    } else {
-      msg.className='call-msg error';msg.textContent='Fehler: '+(data.message||'Anruf konnte nicht gestartet werden.');btn.disabled=false;
-    }
-  } catch(e){
-    msg.className='call-msg error';msg.textContent='Verbindungsfehler. Bitte versuchen Sie es erneut.';btn.disabled=false;
+function toggleAudio(){
+  var wrap=document.getElementById('audioWrap'),btn=document.getElementById('callBtn'),audio=document.getElementById('demoAudio');
+  if(wrap.style.display==='none'){
+    wrap.style.display='block';btn.textContent='✕ Audio ausblenden';
+    audio.play().catch(function(){});
+  } else {
+    wrap.style.display='none';btn.textContent='▶ Demo-Gespräch abspielen';
+    audio.pause();
   }
 }
 
-async function endCall(){
-  var endBtn=document.getElementById('endBtn'),btn=document.getElementById('callBtn'),msg=document.getElementById('callMsg');
-  if(_callSid){try{await fetch(API_BASE+'/api/call/'+_callSid+'/end',{method:'POST'});}catch(e){} _callSid=null;}
-  endBtn.style.display='none';btn.disabled=false;btn.textContent='Jetzt Testanruf erhalten →';
-  msg.className='call-msg';msg.style.display='block';msg.textContent='Anruf beendet.';
-  setTimeout(function(){msg.style.display='none';},3000);
-}
-
-function bookDemo(){
+async function bookDemo(){
   var n=document.getElementById('name').value.trim();
   var c=document.getElementById('company').value.trim();
   var e=document.getElementById('email').value.trim();
+  var m=document.getElementById('message').value.trim();
   var a=document.getElementById('agree').checked;
+  var btn=document.getElementById('bookBtn');
   if(!n||!c||!e){alert('Bitte Name, Firma und E-Mail-Adresse eingeben.');return;}
   if(!a){alert('Bitte Datenschutz bestätigen.');return;}
-  document.getElementById('form-fields').style.display='none';
-  document.getElementById('done').style.display='block';
-  document.getElementById('done-name').textContent=n.split(' ')[0];
+  btn.disabled=true;
+  btn.textContent='Anfrage wird gesendet…';
+  try{
+    var res=await fetch(BOOKING_API_BASE+'/api/demo-booking',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name:n,company:c,email:e,message:m,sourcePage:location.pathname||'krankenbefoerderung'})
+    });
+    var data=await res.json().catch(function(){return {};});
+    if(!res.ok||!data.ok) throw new Error(data.message||'Senden fehlgeschlagen');
+    document.getElementById('form-fields').style.display='none';
+    document.getElementById('done').style.display='block';
+    document.getElementById('done-name').textContent=n.split(' ')[0];
+  } catch(e){
+    alert('Fehler beim Senden. Bitte erneut versuchen oder an info@tawano.de schreiben.');
+    btn.disabled=false;
+    btn.textContent='15-Minuten-Demo buchen →';
+  }
 }
 
 function openModal(id){

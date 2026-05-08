@@ -40,10 +40,7 @@ nav{background:#fff;border-bottom:1px solid #E5E5E3;padding:16px 0;position:stic
 .call-msg.success{color:#047857}
 .call-msg.error{color:#B91C1C}
 .call-msg.loading{color:#525252}
-.call-debug{display:none;margin-top:14px;padding:14px 16px;border-radius:12px;border:1px solid #D6E4FF;background:#F8FBFF;color:#1F2937;font-size:12px;line-height:1.65}
-.call-debug strong{color:#0F172A}
-.call-debug code{display:inline-block;padding:1px 6px;border-radius:999px;background:#E0F2FE;color:#075985;font-size:11px;font-weight:700}
-.demo-link{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:#111827;font-weight:700;text-decoration:none;margin-bottom:36px;border-bottom:1px solid #D6D3D1;padding-bottom:2px;transition:opacity .2s;cursor:pointer}
+.demo-link{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:#ffffff;font-weight:700;text-decoration:none;margin-bottom:36px;border-bottom:1px solid #D6D3D1;padding-bottom:2px;transition:opacity .2s;cursor:pointer}
 .demo-link:hover{opacity:.75}
 .trust-row{display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;font-size:13px;color:#737373}
 .trust-row span{display:inline-flex;align-items:center}
@@ -272,7 +269,6 @@ footer p{font-size:13px;color:#A3A3A3}
     <button class="btn-call" id="callBtn" onclick="triggerCall()">Jetzt Testanruf erhalten →</button>
     <button class="btn-end" id="endBtn" onclick="endCall()">Anruf beenden</button>
     <div id="callMsg" class="call-msg"></div>
-    <div id="callDebug" class="call-debug"></div>
   </div>
   <a class="demo-link" onclick="document.getElementById('live').scrollIntoView({behavior:'smooth'})">📅 Direkt Demo buchen →</a>
   <div class="trust-row">
@@ -680,7 +676,6 @@ var AGENT_ID = 'tawano-general';
 var API_BASE = 'https://pointless-jacket-reshape.ngrok-free.dev';
 var BOOKING_API_BASE=(location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')?'http://localhost:8787':API_BASE;
 var _callSid = null;
-var _callDebugId = null;
 var _callStatusTimer = null;
 
 function normPhone(raw){
@@ -692,119 +687,36 @@ function normPhone(raw){
 }
 
 async function triggerCall(){
-  var input=document.getElementById('phone'),btn=document.getElementById('callBtn'),endBtn=document.getElementById('endBtn'),msg=document.getElementById('callMsg'),debug=document.getElementById('callDebug');
+  var input=document.getElementById('phone'),btn=document.getElementById('callBtn'),endBtn=document.getElementById('endBtn'),msg=document.getElementById('callMsg');
   var phone=normPhone((input.value||'').trim());
   if(!phone){msg.className='call-msg error';msg.style.display='block';msg.textContent='Bitte eine gültige Telefonnummer eingeben.';input.focus();return;}
   btn.disabled=true;msg.className='call-msg loading';msg.style.display='block';msg.textContent='Anruf wird aufgebaut…';
-  debug.style.display='block';
-  debug.innerHTML='<strong>Debug:</strong> warte auf Retell-Antwort...';
   try{
     var res=await fetch(BOOKING_API_BASE+'/api/call',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agentId:AGENT_ID,phoneNumber:phone})});
     var data=await res.json();
     if(data.ok){
       _callSid=data.callSid||null;
-      _callDebugId=data.debugId||null;
-      msg.className='call-msg success';msg.textContent='✓ Retell hat den Anruf registriert. Wir tracken jetzt den Status.';
+      msg.className='call-msg success';msg.textContent='✓ Anruf wird verbunden – Sie erhalten gleich einen Anruf.';
       btn.textContent='Anruf läuft…';endBtn.style.display='block';
-      renderCallDebug({
-        phase:'call_registered',
-        debugId:_callDebugId,
-        callSid:_callSid,
-        status:data.callStatus||'registered',
-        telephonyIdentifier:data.telephonyIdentifier||null,
-        updatedAt:data.updatedAt||new Date().toISOString(),
-        note:'Jetzt pollt die Seite den echten Retell-Status.'
-      });
-      startCallStatusPolling();
     } else {
       msg.className='call-msg error';msg.textContent='Fehler: '+(data.message||'Anruf konnte nicht gestartet werden.');btn.disabled=false;
-      renderCallDebug({phase:'call_failed', debugId:data.debugId||null, callSid:null, status:'error', error:data.message||'Unbekannter Fehler', updatedAt:new Date().toISOString()});
     }
   } catch(e){
     msg.className='call-msg error';msg.textContent='Verbindungsfehler. Bitte versuchen Sie es erneut.';btn.disabled=false;
-    renderCallDebug({phase:'network_error', debugId:_callDebugId, callSid:_callSid, status:'network_error', error:String(e && e.message ? e.message : e), updatedAt:new Date().toISOString()});
   }
 }
 
 async function endCall(){
-  var endBtn=document.getElementById('endBtn'),btn=document.getElementById('callBtn'),msg=document.getElementById('callMsg'),debug=document.getElementById('callDebug');
+  var endBtn=document.getElementById('endBtn'),btn=document.getElementById('callBtn'),msg=document.getElementById('callMsg');
   if(_callStatusTimer){clearInterval(_callStatusTimer);_callStatusTimer=null;}
   if(_callSid){try{await fetch(BOOKING_API_BASE+'/api/call/'+_callSid+'/end',{method:'POST'});}catch(e){}}
   endBtn.style.display='none';btn.disabled=false;btn.textContent='Jetzt Testanruf erhalten →';
   msg.className='call-msg';msg.style.display='block';msg.textContent='Anruf beendet.';
-  debug.innerHTML=debug.innerHTML||'';
-  debug.style.display='block';
-  if(_callSid||_callDebugId){
-    debug.innerHTML += '<br><strong>Hinweis:</strong> Manuelles Ende ausgelöst. Prüfe den Retell-Status im Debug-Log unten oder im Backend.';
-  }
   _callSid=null;
-  _callDebugId=null;
   setTimeout(function(){msg.style.display='none';},3000);
 }
 
-function renderCallDebug(data){
-  var debug=document.getElementById('callDebug');
-  var lines=[];
-  lines.push('<strong>Debug:</strong> <code>'+escapeHtml(data.phase||'unknown')+'</code>');
-  if(data.debugId) lines.push('<div><strong>Debug-ID:</strong> '+escapeHtml(data.debugId)+'</div>');
-  if(data.callSid) lines.push('<div><strong>Call-ID:</strong> '+escapeHtml(data.callSid)+'</div>');
-  if(data.status) lines.push('<div><strong>Status:</strong> '+escapeHtml(data.status)+'</div>');
-  if(data.telephonyIdentifier && data.telephonyIdentifier.twilio_call_sid) lines.push('<div><strong>Twilio SID:</strong> '+escapeHtml(data.telephonyIdentifier.twilio_call_sid)+' </div>');
-  if(data.disconnectionReason) lines.push('<div><strong>Disconnect:</strong> '+escapeHtml(data.disconnectionReason)+'</div>');
-  if(data.error) lines.push('<div><strong>Fehler:</strong> '+escapeHtml(data.error)+'</div>');
-  if(data.note) lines.push('<div>'+escapeHtml(data.note)+'</div>');
-  if(data.updatedAt) lines.push('<div><strong>Updated:</strong> '+escapeHtml(new Date(data.updatedAt).toLocaleString('de-DE'))+'</div>');
-  debug.innerHTML = lines.join('');
-  debug.style.display = 'block';
-}
 
-function startCallStatusPolling(){
-  if(!_callSid) return;
-  if(_callStatusTimer){clearInterval(_callStatusTimer);}
-  var attempts=0;
-  var tick=async function(){
-    attempts += 1;
-    try{
-      var res=await fetch(BOOKING_API_BASE+'/api/call/'+_callSid+'/status');
-      var data=await res.json();
-      if(data.ok){
-        renderCallDebug({
-          phase:'status_poll_'+attempts,
-          debugId:data.debugId||_callDebugId,
-          callSid:_callSid,
-          status:data.status||'unknown',
-          telephonyIdentifier:data.telephonyIdentifier||null,
-          disconnectionReason:data.disconnectionReason||null,
-          note:data.transcriptAvailable ? 'Transcript ist verfügbar.' : 'Transcript noch nicht verfügbar.',
-          updatedAt:data.updatedAt||new Date().toISOString()
-        });
-        if(data.status==='ongoing' || data.status==='ended' || data.status==='error' || data.disconnectionReason){
-          clearInterval(_callStatusTimer);
-          _callStatusTimer=null;
-          if(data.disconnectionReason){
-            document.getElementById('callMsg').className='call-msg error';
-            document.getElementById('callMsg').style.display='block';
-            document.getElementById('callMsg').textContent='Retell-Status: '+data.disconnectionReason;
-          }
-        }
-      } else {
-        renderCallDebug({phase:'status_poll_error', debugId:_callDebugId, callSid:_callSid, status:'error', error:data.message||'Status konnte nicht geladen werden.', updatedAt:new Date().toISOString()});
-      }
-    } catch(err){
-      renderCallDebug({phase:'status_poll_network_error', debugId:_callDebugId, callSid:_callSid, status:'network_error', error:String(err && err.message ? err.message : err), updatedAt:new Date().toISOString()});
-    }
-  };
-  tick();
-  _callStatusTimer=setInterval(function(){
-    if(attempts>=12){
-      clearInterval(_callStatusTimer);
-      _callStatusTimer=null;
-      renderCallDebug({phase:'poll_stopped', debugId:_callDebugId, callSid:_callSid, status:'timeout', note:'Nach 12 Polling-Versuchen gestoppt. Öffne /api/debug/calls im Backend.', updatedAt:new Date().toISOString()});
-      return;
-    }
-    tick();
-  },4000);
-}
 
 function escapeHtml(value){
   return String(value)

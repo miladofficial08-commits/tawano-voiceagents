@@ -1,0 +1,17 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/tawano"
+  to = "/tawano.html"
+  status = 200
+
+[[redirects]]
+  from = "/handwerker"
+  to = "/handwerker.html"
+  status = 200
+
+[[redirects]]
+  from = "/krankenbefoerderung"
+  to = "/krankenbefoerderung.html"
+  status = 200

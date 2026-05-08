@@ -1,5 +1,24 @@
 [build]
   publish = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/call"
+  to = "/.netlify/functions/call"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/demo-booking"
+  to = "/.netlify/functions/demo-booking"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/call/*/end"
+  to = "/.netlify/functions/call"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/tawano"

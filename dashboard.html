@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tawano — Anruf-Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#F5F5F4;color:#1A1A1A;min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* NAV */
+nav{background:#fff;border-bottom:1px solid #E5E5E3;padding:14px 0;position:sticky;top:0;z-index:100}
+.nav-wrap{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:18px;font-weight:800;color:#1A1A1A;text-decoration:none}
+.logo span{color:#047857}
+.nav-right{display:flex;align-items:center;gap:12px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#D1D5DB;display:inline-block;transition:background .3s}
+.status-dot.live{background:#22C55E;box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+.status-dot.error{background:#EF4444}
+#status-text{font-size:13px;color:#737373;font-weight:500}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:background .2s,opacity .2s;display:inline-flex;align-items:center;gap:6px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:#047857;color:#fff}
+.btn-primary:hover:not(:disabled){background:#065f46}
+.btn-ghost{background:transparent;color:#525252;border:1.5px solid #E5E5E3}
+.btn-ghost:hover:not(:disabled){background:#F5F5F4}
+
+/* MAIN LAYOUT */
+.main{max-width:1280px;margin:0 auto;padding:28px 24px}
+
+/* SETTINGS BAR */
+.settings-bar{background:#fff;border:1px solid #E5E5E3;border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.settings-bar label{font-size:13px;font-weight:600;color:#374151;white-space:nowrap}
+.settings-bar input{flex:1;min-width:200px;max-width:360px;padding:8px 12px;border:1.5px solid #E5E5E3;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;color:#1A1A1A;outline:none;transition:border .2s}
+.settings-bar input:focus{border-color:#047857;box-shadow:0 0 0 3px rgba(4,120,87,.08)}
+.settings-bar select{padding:8px 12px;border:1.5px solid #E5E5E3;border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;color:#1A1A1A;outline:none;background:#fff;cursor:pointer;transition:border .2s}
+.settings-bar select:focus{border-color:#047857}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:#fff;border:1px solid #E5E5E3;border-radius:12px;padding:18px 20px}
+.stat-card .sc-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#9CA3AF;margin-bottom:6px}
+.stat-card .sc-value{font-size:28px;font-weight:800;letter-spacing:-1px;color:#0A0A0A}
+.stat-card .sc-sub{font-size:12px;color:#9CA3AF;margin-top:4px}
+
+/* TABLE */
+.table-wrap{background:#fff;border:1px solid #E5E5E3;border-radius:12px;overflow:hidden}
+.table-header{padding:16px 20px;border-bottom:1px solid #F3F4F6;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.table-header h2{font-size:15px;font-weight:700;color:#111827}
+.last-updated{font-size:12px;color:#9CA3AF}
+.filter-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.filter-btn{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E5E3;background:#fff;color:#525252;font-family:'Inter',sans-serif;transition:all .15s}
+.filter-btn.active{background:#047857;border-color:#047857;color:#fff}
+
+table{width:100%;border-collapse:collapse}
+thead th{padding:11px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#9CA3AF;border-bottom:1px solid #F3F4F6;white-space:nowrap}
+tbody tr{border-bottom:1px solid #F9FAFB;cursor:pointer;transition:background .12s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#FAFAF9}
+tbody tr.expanded{background:#F0FDF4}
+td{padding:13px 16px;font-size:13px;color:#374151;vertical-align:middle}
+td.mono{font-family:'Menlo','Consolas',monospace;font-size:12px;color:#525252}
+td.phone{font-weight:700;color:#111827;font-size:14px}
+
+/* STATUS BADGES */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.7}
+.badge-registered,.badge-starting{background:#FEF9C3;color:#854D0E}
+.badge-ongoing{background:#DCFCE7;color:#14532D}
+.badge-ended{background:#F1F5F9;color:#475569}
+.badge-error,.badge-retell_error,.badge-network_error{background:#FEE2E2;color:#991B1B}
+
+/* EXPAND ROW */
+.detail-row td{padding:0 !important;border-bottom:1px solid #E5E7EB}
+.detail-inner{padding:20px 24px;background:#F8FAF9;border-top:1px solid #E5E7EB}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:16px}
+.detail-item{background:#fff;border:1px solid #E5E5E3;border-radius:8px;padding:12px 14px}
+.detail-item .di-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#9CA3AF;margin-bottom:4px}
+.detail-item .di-value{font-size:13px;font-weight:600;color:#111827;word-break:break-all}
+.detail-item .di-value.mono{font-family:'Menlo','Consolas',monospace;font-size:11px}
+
+/* EVENTS TIMELINE */
+.events-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#9CA3AF;margin-bottom:10px}
+.event-list{display:flex;flex-direction:column;gap:6px}
+.event-item{display:flex;align-items:flex-start;gap:10px;font-size:12px}
+.event-dot{width:8px;height:8px;border-radius:50%;background:#047857;margin-top:3px;flex-shrink:0}
+.event-time{color:#9CA3AF;white-space:nowrap;font-family:'Menlo','Consolas',monospace;font-size:11px}
+.event-type{font-weight:600;color:#374151}
+.event-detail{color:#9CA3AF;margin-left:4px}
+
+/* EMPTY / LOADING */
+.empty-state{padding:64px 24px;text-align:center}
+.empty-state svg{width:40px;height:40px;stroke:#D1D5DB;fill:none;stroke-width:1.5;margin:0 auto 16px;display:block}
+.empty-state p{font-size:14px;color:#9CA3AF;font-weight:500}
+.empty-state .sub{font-size:12px;color:#C4C4C4;margin-top:6px}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(4,120,87,.2);border-top-color:#047857;border-radius:50%;animation:spin .7s linear infinite;margin-right:4px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* AGENT LABEL */
+.agent-tag{display:inline-block;background:#F0FDF4;color:#14532D;border:1px solid #BBF7D0;border-radius:5px;padding:2px 8px;font-size:11px;font-weight:600}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  td:nth-child(4),th:nth-child(4),td:nth-child(5),th:nth-child(5){display:none}
+}
+@media(max-width:500px){
+  .stats-row{grid-template-columns:1fr 1fr}
+}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* TRANSCRIPT */
+.transcript-section{margin-top:16px;border-top:1px solid #E5E7EB;padding-top:16px}
+.transcript-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.transcript-bar-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#9CA3AF}
+.transcript-actions{display:flex;gap:8px;align-items:center}
+.btn-sm{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:background .15s;display:inline-flex;align-items:center;gap:5px}
+.btn-sm-green{background:#047857;color:#fff}
+.btn-sm-green:hover:not(:disabled){background:#065f46}
+.btn-sm-green:disabled{opacity:.5;cursor:not-allowed}
+.btn-sm-outline{background:#fff;color:#374151;border:1.5px solid #E5E5E3}
+.btn-sm-outline:hover{background:#F5F5F4}
+.transcript-chat{background:#fff;border:1px solid #E5E5E3;border-radius:10px;padding:16px;max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.msg{display:flex;flex-direction:column;gap:2px;max-width:80%}
+.msg-agent{align-self:flex-start}
+.msg-user{align-self:flex-end}
+.msg-role{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#9CA3AF;margin-bottom:3px}
+.msg-user .msg-role{text-align:right;color:#047857}
+.msg-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.55;color:#111827}
+.msg-agent .msg-bubble{background:#F3F4F6;border-bottom-left-radius:4px}
+.msg-user .msg-bubble{background:#ECFDF5;border-bottom-right-radius:4px;color:#064E3B}
+.msg-time{font-size:10px;color:#D1D5DB;font-family:'Menlo','Consolas',monospace}
+.msg-user .msg-time{text-align:right}
+.transcript-raw{background:#1E1E1E;color:#D4D4D4;border-radius:10px;padding:14px;font-size:12px;font-family:'Menlo','Consolas',monospace;white-space:pre-wrap;max-height:340px;overflow-y:auto;line-height:1.7}
+.transcript-placeholder{background:#F9FAFB;border:1.5px dashed #E5E5E3;border-radius:10px;padding:28px;text-align:center;color:#9CA3AF;font-size:13px}
+.transcript-placeholder p{margin-bottom:8px;font-weight:500}
+.transcript-placeholder .sub{font-size:12px;color:#C4C4C4}
+
+/* ANALYSIS */
+.analysis-section{margin-top:16px;border-top:1px solid #E5E7EB;padding-top:16px}
+.analysis-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#9CA3AF;margin-bottom:10px}
+.analysis-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.analysis-card{background:#fff;border:1px solid #E5E5E3;border-radius:8px;padding:12px 14px}
+.analysis-card .ac-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#9CA3AF;margin-bottom:5px}
+.analysis-card .ac-val{font-size:14px;font-weight:700;color:#111827}
+.analysis-card .ac-sub{font-size:11px;color:#9CA3AF;margin-top:2px}
+.sentiment-pos{color:#047857}
+.sentiment-neg{color:#B91C1C}
+.sentiment-neu{color:#6B7280}
+.keyword-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.kw{background:#F0FDF4;color:#14532D;border:1px solid #BBF7D0;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600}
+.analysis-summary{background:#fff;border:1px solid #E5E5E3;border-radius:8px;padding:14px;font-size:13px;color:#374151;line-height:1.6;margin-top:10px}
+.analysis-summary .as-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#9CA3AF;margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-wrap">
+    <a href="index.html" class="logo">Tawano <span>Dashboard</span></a>
+    <div class="nav-right">
+      <span class="status-dot" id="conn-dot"></span>
+      <span id="status-text">Verbinde...</span>
+      <button class="btn btn-ghost" id="btn-refresh" onclick="loadCalls()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Aktualisieren
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+
+  <!-- Settings -->
+  <div class="settings-bar">
+    <label for="server-url">Server-URL</label>
+    <input type="text" id="server-url" value="http://localhost:8787" placeholder="http://localhost:8787">
+    <select id="refresh-interval">
+      <option value="0">Kein Auto-Refresh</option>
+      <option value="5000">Alle 5 Sek.</option>
+      <option value="10000" selected>Alle 10 Sek.</option>
+      <option value="30000">Alle 30 Sek.</option>
+      <option value="60000">Alle 60 Sek.</option>
+    </select>
+    <button class="btn btn-primary" onclick="applySettings()">Verbinden</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="sc-label">Gesamt</div>
+      <div class="sc-value" id="stat-total">—</div>
+      <div class="sc-sub">Anrufe geladen</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Aktiv</div>
+      <div class="sc-value" id="stat-active">—</div>
+      <div class="sc-sub">Laufend / Registriert</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Beendet</div>
+      <div class="sc-value" id="stat-ended">—</div>
+      <div class="sc-sub">Abgeschlossen</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Fehler</div>
+      <div class="sc-value" id="stat-errors">—</div>
+      <div class="sc-sub">Fehlgeschlagen</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-label">Letzter Anruf</div>
+      <div class="sc-value" id="stat-last" style="font-size:16px;padding-top:4px">—</div>
+      <div class="sc-sub" id="stat-last-num"></div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <h2>Anrufe</h2>
+        <div class="filter-row" id="filter-row">
+          <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">Alle</button>
+          <button class="filter-btn" data-filter="active" onclick="setFilter('active',this)">Aktiv</button>
+          <button class="filter-btn" data-filter="ended" onclick="setFilter('ended',this)">Beendet</button>
+          <button class="filter-btn" data-filter="error" onclick="setFilter('error',this)">Fehler</button>
+        </div>
+      </div>
+      <span class="last-updated" id="last-updated-text"></span>
+    </div>
+    <div id="table-container">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 11.23 19.79 19.79 0 0 1 1.61 2.62 2 2 0 0 1 3.6.44h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 7.91a16 16 0 0 0 6.06 6.06l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 14.92z"/></svg>
+        <p>Keine Anrufe geladen</p>
+        <p class="sub">Klicke „Verbinden" um Daten vom Server zu laden</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let allCalls = [];
+let activeFilter = 'all';
+let expandedRow = null;
+let refreshTimer = null;
+
+// ── helpers ─────────────────────────────────────────────────────────────────
+function serverUrl() {
+  return (document.getElementById('server-url').value || 'http://localhost:8787').replace(/\/$/, '');
+}
+
+function setConnStatus(state, text) {
+  const dot = document.getElementById('conn-dot');
+  const txt = document.getElementById('status-text');
+  dot.className = 'status-dot ' + state;
+  txt.textContent = text;
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' })
+    + ' ' + d.toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+
+function fmtTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+
+function fmtDuration(ms) {
+  if (!ms) return '—';
+  const s = Math.round(ms / 1000);
+  if (s < 60) return s + ' Sek.';
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${m}m ${r}s`;
+}
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'gerade eben';
+  if (m < 60) return `vor ${m} Min.`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `vor ${h}h`;
+  return `vor ${Math.floor(h/24)} Tagen`;
+}
+
+function badgeClass(status) {
+  if (!status) return 'badge-registered';
+  const s = status.toLowerCase();
+  if (s === 'ongoing' || s === 'in-progress') return 'badge-ongoing';
+  if (s === 'ended' || s === 'completed') return 'badge-ended';
+  if (s.includes('error') || s.includes('network')) return 'badge-error';
+  return 'badge-registered';
+}
+
+function agentLabel(id) {
+  const map = {
+    'tawano-general':  'Tawano',
+    'handwerker-demo': 'Handwerker',
+    'punkt24-demo':    'Krankenbeförderung',
+  };
+  return map[id] || (id || '—');
+}
+
+// ── load calls ───────────────────────────────────────────────────────────────
+async function loadCalls() {
+  const btn = document.getElementById('btn-refresh');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Laden...';
+  setConnStatus('', 'Verbinde...');
+
+  try {
+    const res = await fetch(serverUrl() + '/api/debug/calls', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    allCalls = json.calls || [];
+    setConnStatus('live', 'Verbunden');
+    renderTable();
+    updateStats();
+    document.getElementById('last-updated-text').textContent = 'Zuletzt: ' + fmtTime(new Date().toISOString());
+  } catch (e) {
+    setConnStatus('error', 'Fehler: ' + e.message);
+    toast('Verbindungsfehler: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Aktualisieren';
+  }
+}
+
+// ── stats ────────────────────────────────────────────────────────────────────
+function updateStats() {
+  const total = allCalls.length;
+  const active = allCalls.filter(c => ['ongoing','registered','starting','in-progress'].includes((c.status||'').toLowerCase())).length;
+  const ended = allCalls.filter(c => ['ended','completed'].includes((c.status||'').toLowerCase())).length;
+  const errors = allCalls.filter(c => (c.status||'').toLowerCase().includes('error') || (c.status||'').toLowerCase().includes('network')).length;
+  const last = allCalls[0];
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-active').textContent = active;
+  document.getElementById('stat-ended').textContent = ended;
+  document.getElementById('stat-errors').textContent = errors;
+  if (last) {
+    document.getElementById('stat-last').textContent = timeAgo(last.createdAt);
+    document.getElementById('stat-last-num').textContent = last.phoneNumber || '';
+  }
+}
+
+// ── filter ───────────────────────────────────────────────────────────────────
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  expandedRow = null;
+  renderTable();
+}
+
+function filteredCalls() {
+  if (activeFilter === 'all') return allCalls;
+  if (activeFilter === 'active') return allCalls.filter(c => ['ongoing','registered','starting','in-progress'].includes((c.status||'').toLowerCase()));
+  if (activeFilter === 'ended') return allCalls.filter(c => ['ended','completed'].includes((c.status||'').toLowerCase()));
+  if (activeFilter === 'error') return allCalls.filter(c => (c.status||'').toLowerCase().includes('error') || (c.status||'').toLowerCase().includes('network'));
+  return allCalls;
+}
+
+// ── render table ─────────────────────────────────────────────────────────────
+function renderTable() {
+  const calls = filteredCalls();
+  const container = document.getElementById('table-container');
+
+  if (calls.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 11.23 19.79 19.79 0 0 1 1.61 2.62 2 2 0 0 1 3.6.44h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 7.91a16 16 0 0 0 6.06 6.06l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 14.92z"/></svg>
+        <p>Keine Anrufe für diesen Filter</p>
+      </div>`;
+    return;
+  }
+
+  let html = `<table>
+    <thead>
+      <tr>
+        <th>Rufnummer</th>
+        <th>Agent</th>
+        <th>Status</th>
+        <th>SMS</th>
+        <th>Uhrzeit</th>
+        <th>Letzte Aktivität</th>
+        <th>Call-ID</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="calls-tbody">`;
+
+  calls.forEach((c, i) => {
+    const isExp = expandedRow === i;
+    const smsBadge = c.smsSent === true
+      ? '<span class="badge badge-ongoing">✓ SMS</span>'
+      : c.smsSent === false
+        ? '<span class="badge badge-error">✗ SMS</span>'
+        : '<span style="color:#D1D5DB;font-size:12px">—</span>';
+    html += `
+      <tr onclick="toggleExpand(${i})" ${isExp ? 'class="expanded"' : ''}>
+        <td class="phone">${escHtml(c.phoneNumber || '—')}</td>
+        <td><span class="agent-tag">${escHtml(agentLabel(c.requestedAgentId))}</span></td>
+        <td><span class="badge ${badgeClass(c.status)}">${escHtml(c.status || '—')}</span></td>
+        <td>${smsBadge}</td>
+        <td class="mono">${fmtTime(c.createdAt)}</td>
+        <td class="mono">${timeAgo(c.updatedAt)}</td>
+        <td class="mono">${c.callSid ? c.callSid.substring(0,18) + '…' : '—'}</td>
+        <td style="text-align:right;color:#9CA3AF;font-size:18px">${isExp ? '▲' : '▼'}</td>
+      </tr>`;
+    if (isExp) {
+      html += `<tr class="detail-row"><td colspan="7">${buildDetail(c)}</td></tr>`;
+    }
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+// transcript cache: cacheKey -> { data, viewMode }
+const transcriptCache = {};
+
+function buildDetail(c) {
+  const items = [
+    ['Rufnummer', escHtml(c.phoneNumber || '—')],
+    ['Agent (angefordert)', escHtml(c.requestedAgentId || '—')],
+    ['Agent (aufgelöst)', escHtml(c.resolvedAgentId ? c.resolvedAgentId.substring(0,24)+'…' : '—')],
+    ['Status', escHtml(c.status || '—')],
+    ['Retell-Status', escHtml(c.retellStatus || '—')],
+    ['Trennungsgrund', escHtml(c.disconnectionReason || '—')],
+    ['Erstellt am', fmtDate(c.createdAt)],
+    ['Zuletzt aktualisiert', fmtDate(c.updatedAt)],
+    ['Call-SID', escHtml(c.callSid || '—'), true],
+    ['Debug-ID', escHtml(c.debugId || '—'), true],
+    ['Telephony-ID', escHtml(c.telephonyIdentifier || '—'), true],
+    ['SMS gesendet', c.smsSent === true ? '✓ Ja' : c.smsSent === false ? '✗ Nein' : '—'],
+  ];
+
+  if (c.error) {
+    items.push(['Fehler', escHtml(JSON.stringify(c.error)), true]);
+  }
+
+  let grid = '<div class="detail-grid">';
+  items.forEach(([label, val, mono]) => {
+    grid += `<div class="detail-item">
+      <div class="di-label">${label}</div>
+      <div class="di-value ${mono ? 'mono' : ''}">${val}</div>
+    </div>`;
+  });
+  grid += '</div>';
+
+  // Events timeline
+  let evHTML = '';
+  if (Array.isArray(c.events) && c.events.length > 0) {
+    evHTML = `<div class="events-title">Ereignisse</div><div class="event-list">`;
+    c.events.forEach(ev => {
+      const extra = [];
+      if (ev.callSid) extra.push('SID: ' + ev.callSid.substring(0,16) + '…');
+      if (ev.status) extra.push('Status: ' + ev.status);
+      if (ev.disconnectionReason) extra.push('Grund: ' + ev.disconnectionReason);
+      if (ev.error) extra.push(JSON.stringify(ev.error));
+      evHTML += `<div class="event-item">
+        <div class="event-dot"></div>
+        <div>
+          <span class="event-time">${fmtTime(ev.at)}</span>
+          <span class="event-type"> ${escHtml(ev.type || '')}</span>
+          ${extra.length ? `<span class="event-detail">— ${extra.join(', ')}</span>` : ''}
+        </div>
+      </div>`;
+    });
+    evHTML += '</div>';
+  }
+
+  // Transcript + analysis
+  const cacheKey = c.callSid || c.debugId;
+  const cached = cacheKey ? transcriptCache[cacheKey] : null;
+  const transcriptHTML = buildTranscriptSection(c, cached);
+  const analysisHTML = cached && !cached.loading && !cached.error ? buildAnalysis(cached) : '';
+
+  return `<div class="detail-inner">${grid}${evHTML}${transcriptHTML}${analysisHTML}</div>`;
+}
+
+function buildTranscriptSection(c, cached) {
+  const cacheKey = c.callSid || c.debugId;
+  const hasCallSid = Boolean(c.callSid);
+
+  // Not yet loaded
+  if (!cached) {
+    return `<div class="transcript-section">
+      <div class="transcript-bar">
+        <span class="transcript-bar-title">Transkript</span>
+        ${hasCallSid
+          ? `<button class="btn-sm btn-sm-green" onclick="loadTranscript('${escHtml(cacheKey)}','${escHtml(c.callSid)}');event.stopPropagation()">Transkript laden</button>`
+          : ''}
+      </div>
+      <div class="transcript-placeholder">
+        <p>Transkript noch nicht geladen</p>
+        <p class="sub">${hasCallSid ? 'Klicke „Transkript laden" um das Gespräch abzurufen' : 'Kein Call-SID verfügbar'}</p>
+      </div>
+    </div>`;
+  }
+
+  if (cached.loading) {
+    return `<div class="transcript-section">
+      <div class="transcript-bar"><span class="transcript-bar-title">Transkript</span></div>
+      <div class="transcript-placeholder"><p><span class="spinner"></span> Wird geladen…</p></div>
+    </div>`;
+  }
+
+  if (cached.error) {
+    return `<div class="transcript-section">
+      <div class="transcript-bar">
+        <span class="transcript-bar-title">Transkript</span>
+        <button class="btn-sm btn-sm-outline" onclick="loadTranscript('${escHtml(cacheKey)}','${escHtml(c.callSid)}');event.stopPropagation()">Erneut versuchen</button>
+      </div>
+      <div class="transcript-placeholder"><p style="color:#B91C1C">Fehler: ${escHtml(cached.error)}</p></div>
+    </div>`;
+  }
+
+  const viewMode = cached.viewMode || 'chat';
+  const btnChat = `<button class="btn-sm ${viewMode==='chat'?'btn-sm-green':'btn-sm-outline'}" onclick="setTranscriptView('${escHtml(cacheKey)}','chat');event.stopPropagation()">Chat</button>`;
+  const btnRaw  = `<button class="btn-sm ${viewMode==='raw'?'btn-sm-green':'btn-sm-outline'}" onclick="setTranscriptView('${escHtml(cacheKey)}','raw');event.stopPropagation()">Rohtext</button>`;
+  const btnCopy = `<button class="btn-sm btn-sm-outline" onclick="copyTranscript('${escHtml(cacheKey)}');event.stopPropagation()">Kopieren</button>`;
+  const btnReload = `<button class="btn-sm btn-sm-outline" onclick="loadTranscript('${escHtml(cacheKey)}','${escHtml(c.callSid)}');event.stopPropagation()">Neu laden</button>`;
+
+  let content = '';
+  if (viewMode === 'chat' && Array.isArray(cached.transcriptObject) && cached.transcriptObject.length > 0) {
+    let msgs = '';
+    cached.transcriptObject.forEach(msg => {
+      const isAgent = (msg.role || '').toLowerCase() === 'agent';
+      const roleLabel = isAgent ? 'KI-Agent' : 'Kunde';
+      const ts = msg.words && msg.words[0] ? formatSeconds(msg.words[0].start) : '';
+      msgs += `<div class="msg ${isAgent ? 'msg-agent' : 'msg-user'}">
+        <div class="msg-role">${escHtml(roleLabel)}${ts ? ' <span class="msg-time">'+escHtml(ts)+'</span>' : ''}</div>
+        <div class="msg-bubble">${escHtml(msg.content || '')}</div>
+      </div>`;
+    });
+    content = `<div class="transcript-chat">${msgs}</div>`;
+  } else {
+    const rawText = cached.transcript || 'Kein Transkript-Text verfügbar.';
+    content = `<div class="transcript-raw">${escHtml(rawText)}</div>`;
+  }
+
+  return `<div class="transcript-section">
+    <div class="transcript-bar">
+      <span class="transcript-bar-title">Transkript</span>
+      <div class="transcript-actions">${btnChat}${btnRaw}${btnCopy}${btnReload}</div>
+    </div>
+    ${content}
+  </div>`;
+}
+
+function buildAnalysis(cached) {
+  const transcript = cached.transcript || '';
+  const analysis = cached.callAnalysis || {};
+  if (!transcript && !Object.keys(analysis).length) return '';
+
+  const words = transcript.trim().split(/\s+/).filter(Boolean);
+  const wordCount = words.length;
+  const sentences = transcript.split(/[.!?]+/).filter(s => s.trim().length > 2).length;
+  const avgWordsPerSentence = sentences ? Math.round(wordCount / sentences) : 0;
+
+  const msgs = Array.isArray(cached.transcriptObject) ? cached.transcriptObject : [];
+  const agentMsgs = msgs.filter(m => (m.role||'').toLowerCase() === 'agent');
+  const userMsgs  = msgs.filter(m => (m.role||'').toLowerCase() === 'user');
+  const agentWords = agentMsgs.reduce((a,m) => a + (m.content||'').split(/\s+/).filter(Boolean).length, 0);
+  const userWords  = userMsgs.reduce((a,m) => a + (m.content||'').split(/\s+/).filter(Boolean).length, 0);
+
+  const posWords = ['danke','perfekt','super','gut','prima','gerne','einverstanden','ja','natürlich','klar','wunderbar','toll','hilfreich','freundlich','zufrieden'];
+  const negWords = ['nein','leider','problem','fehler','schlecht','unzufrieden','warte','lang','ärgerlich','falsch','nicht','kein','kaputt','stornieren'];
+  const lower = transcript.toLowerCase();
+  const posHits = posWords.filter(w => lower.includes(w));
+  const negHits = negWords.filter(w => lower.includes(w));
+  const sentimentScore = posHits.length - negHits.length;
+  const sentimentLabel = sentimentScore > 1 ? 'Positiv' : sentimentScore < -1 ? 'Negativ' : 'Neutral';
+  const sentimentClass = sentimentScore > 1 ? 'sentiment-pos' : sentimentScore < -1 ? 'sentiment-neg' : 'sentiment-neu';
+
+  const callSummary = analysis.call_summary || analysis.summary || null;
+  const userSentiment = analysis.user_sentiment || null;
+  const callSuccessful = analysis.call_successful;
+  const customFields = Object.entries(analysis).filter(([k]) => !['call_summary','summary','user_sentiment','call_successful'].includes(k));
+
+  let cards = '';
+
+  if (wordCount > 0) {
+    cards += `<div class="analysis-card">
+      <div class="ac-label">Wörter gesamt</div>
+      <div class="ac-val">${wordCount}</div>
+      <div class="ac-sub">${sentences} Sätze · Ø ${avgWordsPerSentence} Wörter/Satz</div>
+    </div>`;
+  }
+
+  if (agentMsgs.length || userMsgs.length) {
+    cards += `<div class="analysis-card">
+      <div class="ac-label">Gesprächsanteile</div>
+      <div class="ac-val">KI: ${agentWords} · Kunde: ${userWords}</div>
+      <div class="ac-sub">${agentMsgs.length} / ${userMsgs.length} Nachrichten</div>
+    </div>`;
+  }
+
+  if (cached.durationMs) {
+    cards += `<div class="analysis-card">
+      <div class="ac-label">Gesprächsdauer</div>
+      <div class="ac-val">${fmtDuration(cached.durationMs)}</div>
+    </div>`;
+  }
+
+  if (userSentiment) {
+    cards += `<div class="analysis-card">
+      <div class="ac-label">Sentiment (Retell)</div>
+      <div class="ac-val">${escHtml(userSentiment)}</div>
+    </div>`;
+  } else if (wordCount > 0) {
+    cards += `<div class="analysis-card">
+      <div class="ac-label">Stimmung (lokal)</div>
+      <div class="ac-val ${sentimentClass}">${sentimentLabel}</div>
+      <div class="ac-sub">${posHits.length > 0 ? posHits.slice(0,3).join(', ') : '—'}</div>
+    </div>`;
+  }
+
+  if (callSuccessful !== undefined && callSuccessful !== null) {
+    cards += `<div class="analysis-card">
+      <div class="ac-label">Anruf erfolgreich</div>
+      <div class="ac-val ${callSuccessful ? 'sentiment-pos' : 'sentiment-neg'}">${callSuccessful ? 'Ja' : 'Nein'}</div>
+    </div>`;
+  }
+
+  customFields.forEach(([k, v]) => {
+    cards += `<div class="analysis-card">
+      <div class="ac-label">${escHtml(k)}</div>
+      <div class="ac-val" style="font-size:12px;word-break:break-all">${escHtml(String(v))}</div>
+    </div>`;
+  });
+
+  let kwHTML = '';
+  const allKw = [...new Set([...posHits, ...negHits])].slice(0, 12);
+  if (allKw.length) {
+    kwHTML = `<div class="analysis-card" style="grid-column:1/-1">
+      <div class="ac-label">Erkannte Schlüsselwörter</div>
+      <div class="keyword-list">${allKw.map(k => `<span class="kw">${escHtml(k)}</span>`).join('')}</div>
+    </div>`;
+  }
+
+  const summaryHTML = callSummary
+    ? `<div class="analysis-summary"><div class="as-label">Zusammenfassung</div>${escHtml(callSummary)}</div>`
+    : '';
+
+  if (!cards && !summaryHTML) return '';
+
+  return `<div class="analysis-section">
+    <div class="analysis-title">Analyse</div>
+    <div class="analysis-grid">${cards}${kwHTML}</div>
+    ${summaryHTML}
+  </div>`;
+}
+
+async function loadTranscript(cacheKey, callSid) {
+  if (!callSid) return;
+  transcriptCache[cacheKey] = { loading: true };
+  renderTable();
+  try {
+    const res = await fetch(serverUrl() + '/api/call/' + encodeURIComponent(callSid) + '/status', { cache: 'no-store' });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'HTTP ' + res.status);
+    const hasData = data.transcript || (Array.isArray(data.transcriptObject) && data.transcriptObject.length > 0);
+    transcriptCache[cacheKey] = {
+      transcript: data.transcript || null,
+      transcriptObject: data.transcriptObject || null,
+      callAnalysis: data.callAnalysis || null,
+      durationMs: data.durationMs || null,
+      viewMode: 'chat',
+      loading: false,
+      error: hasData ? null : 'Kein Transkript verfügbar (Anruf evtl. noch nicht beendet)',
+    };
+  } catch(e) {
+    transcriptCache[cacheKey] = { loading: false, error: e.message };
+  }
+  renderTable();
+}
+
+function setTranscriptView(cacheKey, mode) {
+  if (transcriptCache[cacheKey]) {
+    transcriptCache[cacheKey].viewMode = mode;
+    renderTable();
+  }
+}
+
+function copyTranscript(cacheKey) {
+  const cached = transcriptCache[cacheKey];
+  if (!cached || !cached.transcript) { toast('Kein Transkript zum Kopieren'); return; }
+  navigator.clipboard.writeText(cached.transcript).then(() => toast('Transkript kopiert!')).catch(() => toast('Kopieren fehlgeschlagen'));
+}
+
+function formatSeconds(sec) {
+  if (sec == null) return '';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+
+function toggleExpand(i) {
+  expandedRow = expandedRow === i ? null : i;
+  renderTable();
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ── settings / auto-refresh ──────────────────────────────────────────────────
+function applySettings() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  const interval = parseInt(document.getElementById('refresh-interval').value);
+  loadCalls();
+  if (interval > 0) {
+    refreshTimer = setInterval(loadCalls, interval);
+  }
+}
+
+// init
+applySettings();
+</script>
+</body>
+</html>

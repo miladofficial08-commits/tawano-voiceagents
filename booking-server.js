@@ -16,12 +16,20 @@ const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
 // Retell AI config
 const RETELL_API_KEY = process.env.RETELL_API_KEY || '';
 const RETELL_FROM_NUMBER = process.env.RETELL_FROM_NUMBER || '';
+const RETELL_WEBHOOK_SECRET = process.env.RETELL_WEBHOOK_SECRET || '';
 // Agent IDs per page — set in .env or fall back to one default
 const RETELL_AGENT_IDS = {
   'tawano-general':    process.env.RETELL_AGENT_TAWANO       || process.env.RETELL_AGENT_DEFAULT || '',
   'handwerker-demo':   process.env.RETELL_AGENT_HANDWERKER   || process.env.RETELL_AGENT_DEFAULT || '',
   'punkt24-demo':      process.env.RETELL_AGENT_KRANKEN       || process.env.RETELL_AGENT_DEFAULT || '',
 };
+
+// seven.io SMS config
+const SEVEN_API_KEY  = process.env.SEVEN_API_KEY || '';
+const SMS_FROM       = process.env.SMS_FROM || 'Tawano';          // Absendername (max. 11 Zeichen) oder Nummer
+const SMS_ENABLED    = Boolean(SEVEN_API_KEY);
+const SMS_TEMPLATE   = process.env.SMS_AFTER_CALL_TEMPLATE ||
+  'Vielen Dank für Ihr Gespräch mit unserem KI-Assistenten! Falls Sie Fragen haben, melden wir uns bei Ihnen. – Ihr Tawano-Team';
 
 const callDebugStore = new Map();
 
@@ -42,7 +50,7 @@ app.use(cors({ origin: allowedOrigin === '*' ? true : allowedOrigin }));
 app.use(express.json({ limit: '200kb' }));
 
 app.get('/health', (_, res) => {
-  res.json({ ok: true });
+  res.json({ ok: true, smsEnabled: SMS_ENABLED });
 });
 
 app.get('/api/debug/calls', (_, res) => {
@@ -53,6 +61,88 @@ app.get('/api/debug/calls', (_, res) => {
 
   res.json({ ok: true, calls: recent });
 });
+
+// ── Retell webhook — call lifecycle events ─────────────────────────────────
+app.post('/api/webhooks/retell', async (req, res) => {
+  // Verify signature if secret is set
+  if (RETELL_WEBHOOK_SECRET) {
+    const signature = req.headers['x-retell-signature'] || '';
+    const body = JSON.stringify(req.body);
+    const expected = crypto
+      .createHmac('sha256', RETELL_WEBHOOK_SECRET)
+      .update(body)
+      .digest('hex');
+    if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
+      return res.status(401).json({ ok: false, message: 'Invalid signature' });
+    }
+  }
+
+  const { event, call } = req.body || {};
+  if (!event || !call) return res.status(400).json({ ok: false, message: 'Missing event or call' });
+
+  console.log(`[Retell webhook] event=${event} callId=${call.call_id} status=${call.call_status}`);
+
+  // Update our local store
+  const record = callDebugStore.get(call.call_id);
+  if (record) {
+    record.status = call.call_status || record.status;
+    record.retellStatus = call.call_status || null;
+    record.disconnectionReason = call.disconnection_reason || null;
+    record.startTimestamp = call.start_timestamp || null;
+    record.endTimestamp = call.end_timestamp || null;
+    record.durationMs = call.duration_ms || null;
+    record.callAnalysis = call.call_analysis || null;
+    record.updatedAt = new Date().toISOString();
+    record.events.push({ at: record.updatedAt, type: 'webhook_' + event });
+  }
+
+  // Send SMS after call ends
+  if (event === 'call_ended' && call.to_number) {
+    const smsSent = await sendSmsAfterCall(call.to_number, call);
+    if (record) {
+      record.smsSent = smsSent;
+      record.smsError = smsSent ? null : 'SMS sending failed or disabled';
+      record.events.push({ at: new Date().toISOString(), type: smsSent ? 'sms_sent' : 'sms_skipped' });
+    }
+  }
+
+  res.json({ ok: true });
+});
+
+// ── SMS helper ─────────────────────────────────────────────────────────────
+async function sendSmsAfterCall(toNumber, callData) {
+  if (!SMS_ENABLED) {
+    console.log('[SMS] Skipped — SEVEN_API_KEY not configured');
+    return false;
+  }
+  const message = SMS_TEMPLATE.replace('{number}', toNumber);
+  try {
+    const params = new URLSearchParams({
+      to:   toNumber,
+      text: message,
+      from: SMS_FROM,
+      json: '1',
+    });
+    const res = await fetch('https://gateway.seven.io/api/sms', {
+      method: 'POST',
+      headers: {
+        'X-Api-Key': SEVEN_API_KEY,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params.toString(),
+    });
+    const data = await res.json();
+    if (data.success === '100') {
+      console.log(`[SMS] Sent to ${toNumber} via seven.io — balance: ${data.balance}`);
+      return true;
+    }
+    console.error(`[SMS] seven.io error:`, data);
+    return false;
+  } catch (err) {
+    console.error(`[SMS] Failed to send to ${toNumber}:`, err.message);
+    return false;
+  }
+}
 
 // ── Retell AI: outbound demo call ──────────────────────────────────────────
 app.post('/api/call', async (req, res) => {
@@ -198,6 +288,8 @@ app.get('/api/call/:callId/status', async (req, res) => {
       endTimestamp: data.end_timestamp || null,
       durationMs: data.duration_ms || null,
       callAnalysis: data.call_analysis || null,
+      transcript: data.transcript || null,
+      transcriptObject: data.transcript_object || null,
       transcriptAvailable: Boolean(data.transcript),
       updatedAt: record ? record.updatedAt : new Date().toISOString(),
     });
@@ -322,6 +414,8 @@ function summarizeCallDebug(record) {
     updatedAt: record.updatedAt,
     error: record.error || null,
     telephonyIdentifier: record.telephonyIdentifier || null,
+    smsSent: record.smsSent ?? null,
+    smsError: record.smsError || null,
     events: Array.isArray(record.events) ? record.events.slice(-8) : [],
   };
 }

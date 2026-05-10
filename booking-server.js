@@ -383,6 +383,27 @@ app.post('/api/demo-booking', async (req, res) => {
   }
 });
 
+// ── Analytics store ──────────────────────────────────────────────────────────
+const analyticsEvents = [];
+const MAX_ANALYTICS = 10000;
+
+app.post('/api/analytics', (req, res) => {
+  const ev = req.body || {};
+  if (!ev.type || typeof ev.type !== 'string') return res.status(400).json({ ok: false, message: 'type required' });
+  ev.receivedAt = new Date().toISOString();
+  analyticsEvents.push(ev);
+  if (analyticsEvents.length > MAX_ANALYTICS) analyticsEvents.splice(0, analyticsEvents.length - MAX_ANALYTICS);
+  res.json({ ok: true });
+});
+
+app.get('/api/analytics', (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit || '5000'), 10000);
+  const since = req.query.since ? new Date(req.query.since) : null;
+  let evs = since ? analyticsEvents.filter(e => new Date(e.receivedAt || e.ts) >= since) : analyticsEvents;
+  evs = evs.slice(-limit);
+  res.json({ ok: true, total: analyticsEvents.length, returned: evs.length, events: evs });
+});
+
 app.listen(port, () => {
   console.log(`Booking mailer running on http://localhost:${port}`);
 });

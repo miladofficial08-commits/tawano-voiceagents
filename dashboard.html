@@ -136,6 +136,12 @@ td.phone{font-weight:700;color:#111827;font-size:14px}
 .audio-pct-bar{display:flex;align-items:center;gap:6px}
 .audio-pct-track{flex:1;height:8px;background:#F3F4F6;border-radius:4px;overflow:hidden}
 .audio-pct-fill{height:100%;border-radius:4px;background:#047857}
+.mini-list{display:flex;flex-direction:column;gap:10px}
+.mini-row{display:flex;align-items:center;gap:10px;font-size:12px}
+.mini-label{width:96px;flex-shrink:0;font-weight:600;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-track{flex:1;height:8px;background:#F3F4F6;border-radius:4px;overflow:hidden}
+.mini-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#047857,#10B981)}
+.mini-meta{width:60px;text-align:right;color:#9CA3AF;font-size:11px;flex-shrink:0}
 .anl-events{background:#fff;border:1px solid #E5E5E3;border-radius:12px;padding:18px 20px}
 .anl-events-list{display:flex;flex-direction:column;gap:7px;max-height:280px;overflow-y:auto}
 .anl-ev-row{display:flex;align-items:flex-start;gap:10px;font-size:12px}
@@ -300,6 +306,7 @@ td.phone{font-weight:700;color:#111827;font-size:14px}
       <div class="anl-card"><div class="sc-label">Audio-Plays</div><div class="sc-value" id="anl-audio-plays">—</div><div class="sc-sub">Gesamt gestartet</div></div>
       <div class="anl-card"><div class="sc-label">Ø Scroll-Tiefe</div><div class="sc-value" id="anl-avg-scroll">—</div><div class="sc-sub">Weiteste Stufe Ø</div></div>
       <div class="anl-card"><div class="sc-label">Demo-Anrufe</div><div class="sc-value" id="anl-call-req">—</div><div class="sc-sub">Call-Buttons geklickt</div></div>
+      <div class="anl-card"><div class="sc-label">Formular-Sends</div><div class="sc-value" id="anl-booking-sends">—</div><div class="sc-sub">Demo-Anfragen gestartet</div></div>
       <div class="anl-card"><div class="sc-label">Audio-Abschlüsse</div><div class="sc-value" id="anl-audio-ended">—</div><div class="sc-sub">Vollständig gehört</div></div>
       <div class="anl-card"><div class="sc-label">Events gesamt</div><div class="sc-value" id="anl-total">—</div><div class="sc-sub">Tracking-Ereignisse</div></div>
     </div>
@@ -320,6 +327,17 @@ td.phone{font-weight:700;color:#111827;font-size:14px}
       </div>
     </div>
 
+    <div class="anl-grid">
+      <div class="anl-panel">
+        <div class="anl-panel-title">Geräteverteilung</div>
+        <div id="anl-devices"><div class="anl-empty">Noch keine Daten</div></div>
+      </div>
+      <div class="anl-panel">
+        <div class="anl-panel-title">Top Quellen</div>
+        <div id="anl-sources"><div class="anl-empty">Noch keine Daten</div></div>
+      </div>
+    </div>
+
     <!-- Recent events -->
     <div class="anl-events">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -333,6 +351,9 @@ td.phone{font-weight:700;color:#111827;font-size:14px}
           <option value="audio_ended">Audio-Abschlüsse</option>
           <option value="audio_abandoned">Audio-Abbrüche</option>
           <option value="call_requested">Demo-Anrufe</option>
+          <option value="demo_booking_submit">Formular gestartet</option>
+          <option value="demo_booking_success">Formular erfolgreich</option>
+          <option value="demo_booking_error">Formular Fehler</option>
         </select>
       </div>
       <div class="anl-events-list" id="anl-events-list">
@@ -856,6 +877,7 @@ function renderAnalytics() {
   const audioPlays = evs.filter(e => e.type === 'audio_play').length;
   const audioEnded = evs.filter(e => e.type === 'audio_ended').length;
   const callReq = evs.filter(e => e.type === 'call_requested').length;
+  const bookingSends = evs.filter(e => e.type === 'demo_booking_submit').length;
 
   // avg scroll: per session, highest milestone reached
   const scrollBySession = {};
@@ -865,12 +887,58 @@ function renderAnalytics() {
   const scrollVals = Object.values(scrollBySession);
   const avgScroll = scrollVals.length ? Math.round(scrollVals.reduce((a,b)=>a+b,0)/scrollVals.length) : 0;
 
+  const deviceCounts = { mobile: 0, tablet: 0, desktop: 0, unknown: 0 };
+  const sourceCounts = {};
+  const pageViews = evs.filter(e => e.type === 'page_view');
+  pageViews.forEach(e => {
+    const device = (e.device || 'unknown').toLowerCase();
+    deviceCounts[device] = (deviceCounts[device] || 0) + 1;
+    const ref = (e.referrer || e.ref || '').trim();
+    let label = 'Direkt';
+    if (ref) {
+      try { label = new URL(ref).hostname.replace(/^www\./, ''); }
+      catch (err) { label = ref.substring(0, 32); }
+    }
+    sourceCounts[label] = (sourceCounts[label] || 0) + 1;
+  });
+
   document.getElementById('anl-sessions').textContent = sessions || '0';
   document.getElementById('anl-audio-plays').textContent = audioPlays;
   document.getElementById('anl-avg-scroll').textContent = avgScroll ? avgScroll + '%' : '—';
   document.getElementById('anl-call-req').textContent = callReq;
+  const bookingEl = document.getElementById('anl-booking-sends');
+  if (bookingEl) bookingEl.textContent = bookingSends;
   document.getElementById('anl-audio-ended').textContent = audioEnded;
   document.getElementById('anl-total').textContent = evs.length;
+
+  const renderMiniList = (targetId, entries) => {
+    const el = document.getElementById(targetId);
+    if (!entries.length) {
+      el.innerHTML = '<div class="anl-empty">Noch keine Daten</div>';
+      return;
+    }
+    const max = Math.max(...entries.map(x => x.value), 1);
+    el.innerHTML = '<div class="mini-list">' + entries.map(entry => {
+      const pct = Math.round(entry.value / max * 100);
+      return `<div class="mini-row">
+        <div class="mini-label">${escHtml(entry.label)}</div>
+        <div class="mini-track"><div class="mini-fill" style="width:${pct}%"></div></div>
+        <div class="mini-meta">${entry.value}</div>
+      </div>`;
+    }).join('') + '</div>';
+  };
+
+  renderMiniList('anl-devices', [
+    { label: 'Desktop', value: deviceCounts.desktop || 0 },
+    { label: 'Mobile', value: deviceCounts.mobile || 0 },
+    { label: 'Tablet', value: deviceCounts.tablet || 0 },
+    { label: 'Unbekannt', value: deviceCounts.unknown || 0 },
+  ].filter(x => x.value > 0));
+
+  renderMiniList('anl-sources', Object.entries(sourceCounts)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([label, value]) => ({ label, value })));
 
   // --- Scroll funnel ---
   const totalSessions = sessions || 1;
@@ -949,7 +1017,10 @@ function renderAnalytics() {
       else if (e.type === 'audio_progress') detail = '→ ' + escHtml(e.audio||'') + ' (' + e.milestone + '%)';
       else if (e.type === 'audio_ended') detail = '→ ' + escHtml(e.audio||'') + ' (fertig)';
       else if (e.type === 'audio_abandoned') detail = '→ ' + escHtml(e.audio||'') + ' abgebrochen bei ' + (e.at_pct||0) + '%';
-      else if (e.type === 'page_view' && e.ref) detail = '← ' + escHtml(e.ref.substring(0,50));
+      else if (e.type === 'page_view') detail = (e.referrer || e.ref || e.pagePath || '') ? '← ' + escHtml((e.referrer || e.ref || e.pagePath || '').substring(0,50)) : '';
+      else if (e.type === 'demo_booking_submit') detail = '→ Formular gestartet';
+      else if (e.type === 'demo_booking_success') detail = '→ Formular erfolgreich';
+      else if (e.type === 'demo_booking_error') detail = '→ ' + escHtml(e.error || 'Fehler');
       return `<div class="anl-ev-row">
         <div class="${dotClass}"></div>
         <span class="anl-ev-time">${timeStr}</span>

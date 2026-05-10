@@ -4,6 +4,8 @@ const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const port = Number(process.env.PORT || 8787);
@@ -32,6 +34,9 @@ const SMS_TEMPLATE   = process.env.SMS_AFTER_CALL_TEMPLATE ||
   'Vielen Dank für Ihr Gespräch mit unserem KI-Assistenten! Falls Sie Fragen haben, melden wir uns bei Ihnen. – Ihr Tawano-Team';
 
 const callDebugStore = new Map();
+const MAX_ANALYTICS = 10000;
+const analyticsFile = path.join(__dirname, 'data', 'analytics-events.json');
+const analyticsEvents = loadAnalyticsEvents();
 
 if (!senderEmail || !appPassword) {
   console.error('Missing SMTP credentials. Set GMAIL_SENDER_EMAIL and GMAIL_SENDER_APP_PASSWORD in .env');
@@ -48,6 +53,14 @@ const transporter = nodemailer.createTransport({
 
 app.use(cors({ origin: allowedOrigin === '*' ? true : allowedOrigin }));
 app.use(express.json({ limit: '200kb' }));
+
+// Statische Dateien (HTML, CSS, JS, Audio, Bilder)
+app.use(express.static(path.join(__dirname)));
+
+// Saubere URLs: / → index.html, /handwerker → handwerker.html etc.
+app.get('/handwerker', (_, res) => res.sendFile(path.join(__dirname, 'handwerker.html')));
+app.get('/krankenbefoerderung', (_, res) => res.sendFile(path.join(__dirname, 'krankenbefoerderung.html')));
+app.get('/dashboard', (_, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
 
 app.get('/health', (_, res) => {
   res.json({ ok: true, smsEnabled: SMS_ENABLED });
@@ -384,15 +397,13 @@ app.post('/api/demo-booking', async (req, res) => {
 });
 
 // ── Analytics store ──────────────────────────────────────────────────────────
-const analyticsEvents = [];
-const MAX_ANALYTICS = 10000;
-
 app.post('/api/analytics', (req, res) => {
   const ev = req.body || {};
   if (!ev.type || typeof ev.type !== 'string') return res.status(400).json({ ok: false, message: 'type required' });
   ev.receivedAt = new Date().toISOString();
   analyticsEvents.push(ev);
   if (analyticsEvents.length > MAX_ANALYTICS) analyticsEvents.splice(0, analyticsEvents.length - MAX_ANALYTICS);
+  saveAnalyticsEvents();
   res.json({ ok: true });
 });
 
@@ -439,4 +450,25 @@ function summarizeCallDebug(record) {
     smsError: record.smsError || null,
     events: Array.isArray(record.events) ? record.events.slice(-8) : [],
   };
+}
+
+function loadAnalyticsEvents() {
+  try {
+    if (!fs.existsSync(analyticsFile)) return [];
+    const raw = fs.readFileSync(analyticsFile, 'utf8');
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.slice(-MAX_ANALYTICS) : [];
+  } catch (error) {
+    console.error('Failed to load analytics events:', error.message);
+    return [];
+  }
+}
+
+function saveAnalyticsEvents() {
+  try {
+    fs.mkdirSync(path.dirname(analyticsFile), { recursive: true });
+    fs.writeFileSync(analyticsFile, JSON.stringify(analyticsEvents.slice(-MAX_ANALYTICS), null, 2), 'utf8');
+  } catch (error) {
+    console.error('Failed to save analytics events:', error.message);
+  }
 }

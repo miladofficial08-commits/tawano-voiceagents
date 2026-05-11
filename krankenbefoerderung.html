@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tawano — Ihr digitaler Mitarbeiter für jeden Anruf</title>
-<meta name="description" content="Tawano ist kein Voicebot. Es ist ein digitaler Mitarbeiter, der Anrufe entgegennimmt, Anfragen versteht und die nächsten Schritte automatisch startet.">
+<title>KI-Telefonservice für Krankenbeförderung — Tawano</title>
+<meta name="description" content="Kein verpasster Fahrgast mehr. Tawano nimmt Fahrtanfragen für Krankenbeförderung entgegen, erfasst alle Daten und leitet sie direkt an Ihre Disposition weiter — 24/7.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -14,14 +14,14 @@ body{font-family:'Inter',sans-serif;background:#FAFAF9;color:#1A1A1A;line-height
 nav{background:#fff;border-bottom:1px solid #E5E5E3;padding:16px 0;position:sticky;top:0;z-index:100}
 .nav-wrap{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between}
 .logo{font-size:20px;font-weight:700;color:#1A1A1A;text-decoration:none}
-.logo span{color:#047857}
+.logo span{color:#1E40AF}
 .nav-links{display:flex;gap:24px;align-items:center}
 .nav-links a{font-size:14px;color:#525252;text-decoration:none;font-weight:500;transition:color .2s}
 .nav-links a:hover{color:#1A1A1A}
-.nav-btn{padding:10px 22px;background:#047857;color:#fff!important;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:background .2s}
-.nav-btn:hover{background:#065f46}
+.nav-btn{padding:10px 22px;background:#1E40AF;color:#fff!important;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:background .2s}
+.nav-btn:hover{background:#1E3A8A}
 .hero{max-width:780px;margin:0 auto;padding:64px 24px 56px;text-align:center}
-.hero-tag{display:inline-block;background:#ECFDF5;border:1px solid #D1FAE5;color:#047857;font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px;margin-bottom:24px}
+.hero-tag{display:inline-block;background:#EFF6FF;border:1px solid #DBEAFE;color:#1E40AF;font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px;margin-bottom:24px}
 .hero h1{font-size:clamp(36px,5.5vw,56px);font-weight:800;line-height:1.1;letter-spacing:-1.5px;color:#0A0A0A;margin-bottom:18px}
 .hero-sub{font-size:18px;color:#57534E;line-height:1.6;margin-bottom:40px;font-weight:400}
 .call-wrap{max-width:470px;margin:0 auto 20px;background:#fff;border:1px solid #E7E5E4;border-radius:14px;padding:24px;box-shadow:0 16px 40px rgba(0,0,0,.06)}
@@ -30,21 +30,21 @@ nav{background:#fff;border-bottom:1px solid #E5E5E3;padding:16px 0;position:stic
 .country{padding:0 16px;background:#F8FAFC;border:1.5px solid #E5E7EB;border-radius:10px;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:#374151;min-height:50px}
 .phone-in{flex:1;padding:13px 16px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:15px;color:#374151;font-family:'Inter',sans-serif;outline:none;background:#FDFDFC;transition:border .2s,box-shadow .2s}
 .phone-in::placeholder{color:#9CA3AF}
-.phone-in:focus{border-color:#047857;box-shadow:0 0 0 4px rgba(4,120,87,.08)}
-.btn-call{width:100%;padding:14px;background:#047857;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s}
-.btn-call:hover:not(:disabled){background:#065f46}
+.phone-in:focus{border-color:#1E40AF;box-shadow:0 0 0 4px rgba(30,64,175,.08)}
+.btn-call{width:100%;padding:14px;background:#1E40AF;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s}
+.btn-call:hover:not(:disabled){background:#1E3A8A}
 .btn-call:disabled{opacity:.6;cursor:not-allowed}
 .btn-end{width:100%;padding:12px;background:#fff;color:#B91C1C;border:1.5px solid #FCA5A5;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-top:8px;display:none;transition:background .2s}
 .btn-end:hover{background:#FEF2F2}
 .call-msg{font-size:13px;margin-top:10px;display:none;font-weight:600;line-height:1.5}
-.call-msg.success{color:#047857}
+.call-msg.success{color:#1E40AF}
 .call-msg.error{color:#B91C1C}
 .call-msg.loading{color:#525252}
 .demo-link{display:inline-flex;align-items:center;gap:8px;font-size:15px;color:#1F2937;font-weight:700;text-decoration:none;margin-bottom:36px;border-bottom:1px solid #D6D3D1;padding-bottom:2px;transition:opacity .2s;cursor:pointer}
 .demo-link:hover{opacity:.75}
 .trust-row{display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;font-size:13px;color:#737373}
 .trust-row span{display:inline-flex;align-items:center}
-.trust-row svg{width:14px;height:14px;stroke:#047857;fill:none;stroke-width:2;stroke-linecap:round;margin-right:5px}
+.trust-row svg{width:14px;height:14px;stroke:#1E40AF;fill:none;stroke-width:2;stroke-linecap:round;margin-right:5px}
 section{padding:72px 24px}
 .sec-wrap{max-width:1100px;margin:0 auto}
 .sec-top{text-align:center;margin-bottom:48px}
@@ -68,28 +68,28 @@ section{padding:72px 24px}
 @media(max-width:640px){.cmp-grid{grid-template-columns:1fr}}
 .cmp-card{border-radius:14px;padding:32px 28px;border:1.5px solid}
 .cmp-card-std{background:#fff;border-color:#E5E5E3}
-.cmp-card-tw{background:#ECFDF5;border-color:#6EE7B7}
+.cmp-card-tw{background:#EFF6FF;border-color:#93C5FD}
 .cmp-card-head{display:flex;align-items:center;gap:10px;margin-bottom:24px}
 .cmp-card-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .cmp-card-icon-std{background:#FEF2F2}
-.cmp-card-icon-tw{background:#D1FAE5}
+.cmp-card-icon-tw{background:#DBEAFE}
 .cmp-card-title{font-size:16px;font-weight:800;color:#111827;letter-spacing:-.3px}
 .cmp-card-sub{font-size:12px;font-weight:500;color:#9CA3AF;margin-top:1px}
 .cmp-list{list-style:none;display:flex;flex-direction:column;gap:12px}
 .cmp-list li{display:flex;align-items:flex-start;gap:10px;font-size:14px;line-height:1.5;color:#374151}
 .cmp-list li::before{content:'';width:18px;height:18px;border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
 .cmp-card-std .cmp-list li::before{content:'–';background:#FEE2E2;color:#DC2626}
-.cmp-card-tw .cmp-list li::before{content:'\2713';background:#D1FAE5;color:#047857}
+.cmp-card-tw .cmp-list li::before{content:'\2713';background:#DBEAFE;color:#1E40AF}
 .scen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:48px}
 .scen-card{background:#fff;border:2px solid #E5E5E3;border-radius:10px;padding:24px 20px;transition:border .2s;text-decoration:none;color:inherit;display:block}
-.scen-card:hover{border-color:#047857}
+.scen-card:hover{border-color:#1E40AF}
 .scen-icon{font-size:28px;margin-bottom:14px}
 .scen-card h3{font-size:15px;font-weight:700;margin-bottom:6px;color:#1A1A1A}
 .scen-card p{font-size:13px;color:#737373;line-height:1.55}
-.scen-card .scen-link{display:inline-block;margin-top:10px;font-size:12px;font-weight:700;color:#047857}
+.scen-card .scen-link{display:inline-block;margin-top:10px;font-size:12px;font-weight:700;color:#1E40AF}
 .steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;margin-top:48px}
 .step-box{text-align:center}
-.step-num{width:48px;height:48px;background:#ECFDF5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#047857;margin:0 auto 16px}
+.step-num{width:48px;height:48px;background:#EFF6FF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#1E40AF;margin:0 auto 16px}
 .step-box h3{font-size:16px;font-weight:700;margin-bottom:8px;color:#1A1A1A}
 .step-box p{font-size:14px;color:#737373;line-height:1.6}
 .live-sec{background:#1A1A1A;border-radius:16px;margin:0 24px;overflow:hidden}
@@ -97,34 +97,34 @@ section{padding:72px 24px}
 .live-left h2{font-size:clamp(26px,3.5vw,38px);font-weight:800;letter-spacing:-1px;color:#fff;margin-bottom:16px;line-height:1.15}
 .live-left p{font-size:16px;color:#D4D4D4;line-height:1.65;margin-bottom:28px}
 .check-item{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:#F5F5F4;margin-bottom:10px}
-.check-item::before{content:'\2713';color:#10B981;font-weight:700;font-size:15px;flex-shrink:0}
+.check-item::before{content:'\2713';color:#3B82F6;font-weight:700;font-size:15px;flex-shrink:0}
 .form-container{background:#262626;border-radius:12px;padding:28px;border:1px solid #404040}
 .form-group{margin-bottom:14px}
 .form-label{display:block;font-size:12px;font-weight:700;color:#D4D4D4;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
 .form-input{width:100%;padding:12px 14px;background:#151515;border:1px solid #4A4A4A;border-radius:8px;color:#fff;font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border .2s}
 .form-input::placeholder{color:#737373}
-.form-input:focus{border-color:#10B981}
+.form-input:focus{border-color:#3B82F6}
 .form-textarea{min-height:96px;resize:vertical}
 .form-check{display:flex;align-items:flex-start;gap:8px;margin-bottom:16px}
-.form-check input{margin-top:3px;accent-color:#047857}
+.form-check input{margin-top:3px;accent-color:#1E40AF}
 .form-check label{font-size:12px;color:#D4D4D4;line-height:1.5}
 .form-check a{color:#fff;cursor:pointer}
-.btn-submit{width:100%;padding:14px;background:#047857;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;text-decoration:none;display:block;text-align:center}
-.btn-submit:hover{background:#065f46}
+.btn-submit{width:100%;padding:14px;background:#1E40AF;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;text-decoration:none;display:block;text-align:center}
+.btn-submit:hover{background:#1E3A8A}
 .btn-submit:disabled{opacity:.65;cursor:not-allowed}
 .form-status{display:none;margin-top:10px;font-size:12px;font-weight:600}
 .form-status.error{display:block;color:#FCA5A5}
-.form-status.success{display:block;color:#10B981}
+.form-status.success{display:block;color:#3B82F6}
 .form-done{display:none;text-align:center;padding:32px 16px}
 .form-done-icon{font-size:40px;margin-bottom:12px}
-.form-done p{color:#10B981;font-size:16px;font-weight:600;margin-bottom:6px}
+.form-done p{color:#3B82F6;font-size:16px;font-weight:600;margin-bottom:6px}
 .form-done small{color:#D4D4D4;font-size:13px;line-height:1.6;display:block}
 .final{text-align:center;padding:88px 24px}
 .final h2{font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-1.5px;margin-bottom:16px;color:#0A0A0A}
 .final p{font-size:17px;color:#525252;margin-bottom:36px}
 .final-btns{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
-.btn-final-primary{padding:16px 36px;background:#047857;color:#fff;border-radius:8px;font-size:16px;font-weight:700;text-decoration:none;transition:background .2s;font-family:'Inter',sans-serif;cursor:pointer;border:none}
-.btn-final-primary:hover{background:#065f46}
+.btn-final-primary{padding:16px 36px;background:#1E40AF;color:#fff;border-radius:8px;font-size:16px;font-weight:700;text-decoration:none;transition:background .2s;font-family:'Inter',sans-serif;cursor:pointer;border:none}
+.btn-final-primary:hover{background:#1E3A8A}
 .btn-final-secondary{padding:16px 28px;border:2px solid #E5E5E3;color:#525252;border-radius:8px;font-size:16px;font-weight:500;text-decoration:none;transition:all .2s;font-family:'Inter',sans-serif;background:#fff}
 .btn-final-secondary:hover{border-color:#1A1A1A;color:#1A1A1A}
 footer{background:#fff;border-top:1px solid #E5E5E3;padding:28px 24px}
@@ -141,7 +141,7 @@ footer p{font-size:13px;color:#A3A3A3}
 .modal-date{font-size:12px;color:#9CA3AF;margin-bottom:28px}
 .modal-h2{font-size:15px;font-weight:700;color:#1A1A1A;margin:20px 0 6px}
 .modal-p{font-size:14px;color:#525252;line-height:1.75;margin-bottom:4px}
-.modal-p a{color:#047857}
+.modal-p a{color:#1E40AF}
 .modal-list{margin:8px 0 8px 18px;color:#525252}
 .modal-list li{margin-bottom:6px;line-height:1.7;font-size:14px}
 /* === Reveal animation === */
@@ -153,25 +153,25 @@ footer p{font-size:13px;color:#A3A3A3}
 .features-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;margin-top:32px}
 .feat-list{display:flex;flex-direction:column;gap:20px}
 .feat-item{display:flex;gap:18px;align-items:flex-start;padding:20px;border:1px solid #E7E5E4;border-radius:12px;background:#fff;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
-.feat-item:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.06);border-color:#D1FAE5}
-.feat-icon{width:44px;height:44px;border-radius:10px;background:#ECFDF5;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#047857}
-.feat-icon svg{width:22px;height:22px;stroke:#047857;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.feat-item:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.06);border-color:#DBEAFE}
+.feat-icon{width:44px;height:44px;border-radius:10px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#1E40AF}
+.feat-icon svg{width:22px;height:22px;stroke:#1E40AF;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .feat-text h3{font-size:16px;font-weight:700;color:#0A0A0A;margin-bottom:4px;letter-spacing:-0.2px}
 .feat-text p{font-size:14px;color:#57534E;line-height:1.6}
 .feat-visual{background:linear-gradient(160deg,#0F172A 0%,#1E293B 100%);border-radius:16px;padding:28px;color:#fff;box-shadow:0 30px 60px rgba(15,23,42,.18);position:relative;overflow:hidden}
 .feat-visual::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 0%,rgba(16,185,129,.18),transparent 55%);pointer-events:none}
 .fv-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;position:relative}
 .fv-title{font-size:13px;font-weight:700;color:#fff;letter-spacing:.3px}
-.fv-live{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#34D399;background:rgba(16,185,129,.12);padding:5px 10px;border-radius:999px}
-.fv-live::before{content:'';width:6px;height:6px;border-radius:50%;background:#34D399;box-shadow:0 0 0 0 rgba(52,211,153,.6);animation:pulse 1.8s infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.55)}70%{box-shadow:0 0 0 10px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.fv-live{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#60A5FA;background:rgba(59,130,246,.12);padding:5px 10px;border-radius:999px}
+.fv-live::before{content:'';width:6px;height:6px;border-radius:50%;background:#60A5FA;box-shadow:0 0 0 0 rgba(96,165,250,.6);animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(96,165,250,.55)}70%{box-shadow:0 0 0 10px rgba(96,165,250,0)}100%{box-shadow:0 0 0 0 rgba(96,165,250,0)}}
 .call-row{display:flex;justify-content:space-between;align-items:center;padding:14px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:10px;position:relative;transition:background .2s}
 .call-row:hover{background:rgba(255,255,255,.07)}
 .call-meta{display:flex;flex-direction:column;gap:2px}
 .call-name{font-size:13px;font-weight:700;color:#F8FAFC}
 .call-sub{font-size:11px;color:#94A3B8}
 .call-tag{font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.5px}
-.tag-new{background:rgba(16,185,129,.15);color:#34D399}
+.tag-new{background:rgba(59,130,246,.15);color:#60A5FA}
 .tag-urgent{background:rgba(251,146,60,.15);color:#FB923C}
 .tag-done{background:rgba(148,163,184,.15);color:#CBD5E1}
 .fv-foot{margin-top:18px;display:flex;justify-content:space-between;font-size:11px;color:#94A3B8;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);position:relative}
@@ -181,25 +181,25 @@ footer p{font-size:13px;color:#A3A3A3}
 .industry-sec{background:#FAFAF9}
 .ind-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-top:48px}
 .ind-card{background:#fff;border:1px solid #E7E5E4;border-radius:14px;padding:26px 24px;transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;display:flex;flex-direction:column}
-.ind-card:hover{transform:translateY(-4px);box-shadow:0 24px 50px rgba(0,0,0,.08);border-color:#D1FAE5}
-.ind-img-wrap{width:100%;height:160px;border-radius:10px;overflow:hidden;margin-bottom:18px;background:linear-gradient(135deg,#F0FDF4,#ECFDF5);display:flex;align-items:center;justify-content:center}
+.ind-card:hover{transform:translateY(-4px);box-shadow:0 24px 50px rgba(0,0,0,.08);border-color:#DBEAFE}
+.ind-img-wrap{width:100%;height:160px;border-radius:10px;overflow:hidden;margin-bottom:18px;background:linear-gradient(135deg,#F0FDF4,#EFF6FF);display:flex;align-items:center;justify-content:center}
 .ind-img{width:100%;height:100%;object-fit:cover;display:block}
 .ind-img-wrap svg{width:48px;height:48px;opacity:.25}
 .ind-card h3{font-size:17px;font-weight:700;color:#0A0A0A;margin-bottom:8px;letter-spacing:-0.2px}
 .ind-desc{font-size:13.5px;color:#57534E;line-height:1.6;margin-bottom:14px}
 .ind-list{list-style:none;padding:0;margin:0 0 18px;display:flex;flex-direction:column;gap:6px}
 .ind-list li{font-size:13px;color:#374151;display:flex;align-items:flex-start;gap:8px}
-.ind-list li::before{content:'';width:5px;height:5px;border-radius:50%;background:#10B981;margin-top:8px;flex-shrink:0}
+.ind-list li::before{content:'';width:5px;height:5px;border-radius:50%;background:#3B82F6;margin-top:8px;flex-shrink:0}
 .ind-audio{margin:0 0 14px;width:100%;height:38px;border-radius:8px}
 .ind-audio::-webkit-media-controls-panel{background:#F5F5F4}
 .ind-cta{margin-top:auto;padding:11px 16px;background:#0A0A0A;color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;text-align:center;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s}
-.ind-cta:hover{background:#047857}
+.ind-cta:hover{background:#1E40AF}
 
 /* === Section: How it works (3 steps redesign) === */
 .how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
 .how-card{background:#fff;border:1px solid #E7E5E4;border-radius:14px;padding:32px 28px;position:relative;transition:transform .25s ease,box-shadow .25s ease}
 .how-card:hover{transform:translateY(-3px);box-shadow:0 20px 40px rgba(0,0,0,.06)}
-.how-step{font-size:12px;font-weight:800;color:#047857;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}
+.how-step{font-size:12px;font-weight:800;color:#1E40AF;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}
 .how-card h3{font-size:18px;font-weight:700;color:#0A0A0A;margin-bottom:10px;letter-spacing:-0.3px}
 .how-card p{font-size:14px;color:#57534E;line-height:1.65}
 .how-num-bg{position:absolute;top:18px;right:22px;font-size:48px;font-weight:800;color:#F5F5F4;letter-spacing:-2px;line-height:1;user-select:none}
@@ -209,16 +209,16 @@ footer p{font-size:13px;color:#A3A3A3}
 .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
 .price-card{background:#fff;border:1.5px solid #E7E5E4;border-radius:14px;padding:32px 28px;position:relative;display:flex;flex-direction:column;transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease}
 .price-card:hover{transform:translateY(-4px);box-shadow:0 24px 50px rgba(0,0,0,.06)}
-.price-card.featured{border-color:#047857;box-shadow:0 24px 50px rgba(4,120,87,.1)}
-.price-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#047857;color:#fff;font-size:11px;font-weight:800;padding:5px 14px;border-radius:999px;letter-spacing:.8px;text-transform:uppercase}
-.price-name{font-size:14px;font-weight:700;color:#047857;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.price-card.featured{border-color:#1E40AF;box-shadow:0 24px 50px rgba(30,64,175,.1)}
+.price-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#1E40AF;color:#fff;font-size:11px;font-weight:800;padding:5px 14px;border-radius:999px;letter-spacing:.8px;text-transform:uppercase}
+.price-name{font-size:14px;font-weight:700;color:#1E40AF;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
 .price-tag{font-size:13px;color:#737373;margin-bottom:20px}
 .price-list{list-style:none;padding:0;margin:0 0 24px;display:flex;flex-direction:column;gap:10px;flex:1}
 .price-list li{font-size:14px;color:#374151;display:flex;align-items:flex-start;gap:10px;line-height:1.5}
-.price-list li::before{content:'\2713';color:#10B981;font-weight:700;flex-shrink:0}
+.price-list li::before{content:'\2713';color:#3B82F6;font-weight:700;flex-shrink:0}
 .price-btn{padding:13px 20px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;cursor:pointer;font-family:'Inter',sans-serif;border:none;transition:all .2s;display:block}
-.price-btn.primary{background:#047857;color:#fff}
-.price-btn.primary:hover{background:#065f46}
+.price-btn.primary{background:#1E40AF;color:#fff}
+.price-btn.primary:hover{background:#1E3A8A}
 .price-btn.secondary{background:#fff;color:#0A0A0A;border:1.5px solid #E5E5E3}
 .price-btn.secondary:hover{border-color:#0A0A0A}
 .price-note{margin-top:32px;text-align:center;font-size:13px;color:#737373}
@@ -230,10 +230,10 @@ footer p{font-size:13px;color:#A3A3A3}
 .trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:36px}
 .trust-card{background:#fff;border:1px solid #E7E5E4;border-radius:12px;padding:22px 18px;transition:transform .25s ease,box-shadow .25s ease}
 .trust-card:hover{transform:translateY(-2px);box-shadow:0 16px 32px rgba(0,0,0,.05)}
-.trust-card svg{width:24px;height:24px;stroke:#047857;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-bottom:10px}
+.trust-card svg{width:24px;height:24px;stroke:#1E40AF;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-bottom:10px}
 .trust-card p{font-size:13.5px;color:#1A1A1A;font-weight:600;line-height:1.5;margin:0}
-.about-cta{display:inline-block;padding:14px 32px;background:#047857;color:#fff;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:background .2s}
-.about-cta:hover{background:#065f46}
+.about-cta{display:inline-block;padding:14px 32px;background:#1E40AF;color:#fff;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:background .2s}
+.about-cta:hover{background:#1E3A8A}
 .cal-embed-shell{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.12)}
 .cal-embed-frame{width:100%;height:820px}
 
@@ -269,11 +269,11 @@ footer p{font-size:13px;color:#A3A3A3}
 </nav>
 
 <section class="hero">
-  <div class="hero-tag">Digitaler Mitarbeiter · Düsseldorf, NRW</div>
-  <h1>Ihr Telefon klingelt.<br>Tawano antwortet.</h1>
-  <p class="hero-sub">Kein Voicebot. Kein Anrufbeantworter.<br>Tawano nimmt Anrufe an, versteht das Anliegen und startet die nächsten Schritte — automatisch.</p>
+  <div class="hero-tag">KI-Telefonservice · Krankenbeförderung</div>
+  <h1>Kein Fahrgast<br>geht verloren.</h1>
+  <p class="hero-sub">Lisa nimmt Fahrtanfragen entgegen, erfasst alle nötigen Daten und leitet sie sofort an Ihre Disposition weiter — rund um die Uhr, ohne Warteschleife.</p>
   <div class="call-wrap">
-    <div class="call-label">Live-Test: Lassen Sie sich jetzt direkt anrufen</div>
+    <div class="call-label">Live-Test: Lassen Sie sich jetzt von Lisa anrufen</div>
     <div class="phone-row">
       <div class="country">&#127465;&#127466; +49</div>
       <input type="tel" class="phone-in" id="phone" placeholder="Telefonnummer eingeben">
@@ -284,31 +284,31 @@ footer p{font-size:13px;color:#A3A3A3}
   </div>
   <a class="demo-link" onclick="document.getElementById('live').scrollIntoView({behavior:'smooth'})">&#128197; Direkt Demo buchen &#8594;</a>
   <div class="trust-row">
+    <span><svg viewBox="0 0 16 16"><path d="M13.5 4.5l-7.5 7.5-3.5-3.5"/></svg>24/7 Fahrtannahme</span>
+    <span><svg viewBox="0 0 16 16"><path d="M13.5 4.5l-7.5 7.5-3.5-3.5"/></svg>Direkte Weiterleitung an Disposition</span>
     <span><svg viewBox="0 0 16 16"><path d="M13.5 4.5l-7.5 7.5-3.5-3.5"/></svg>In 24 Stunden einsatzbereit</span>
-    <span><svg viewBox="0 0 16 16"><path d="M13.5 4.5l-7.5 7.5-3.5-3.5"/></svg>Kein Vertrag nötig</span>
-    <span><svg viewBox="0 0 16 16"><path d="M13.5 4.5l-7.5 7.5-3.5-3.5"/></svg>Für lokale Betriebe</span>
   </div>
 </section>
 
 <div class="stats reveal">
   <div class="stats-inner">
-    <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Erreichbar — auch wenn Sie es nicht sind</div></div>
-    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Anrufe werden angenommen</div></div>
-    <div class="stat"><div class="stat-num">24h</div><div class="stat-label">Bis zum ersten Einsatz</div></div>
+    <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Fahrtannahme — auch nachts und am Wochenende</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Anrufe werden angenommen — kein Fahrgast wartet</div></div>
+    <div class="stat"><div class="stat-num">24h</div><div class="stat-label">Bis Lisa bei Ihnen live ist</div></div>
   </div>
 </div>
 
 <div class="testi">
-  <blockquote>„Endlich gehen keine Aufträge mehr verloren, wenn wir auf der Baustelle sind. Der Assistent klingt wie ein echter Mitarbeiter — unsere Kunden merken keinen Unterschied."<cite>— Pilot-Kunde, Heizungs- und Sanitärbetrieb Düsseldorf</cite></blockquote>
+  <blockquote>„Früher sind uns nachts und am Wochenende ständig Fahrten durch die Lappen gegangen. Seit Lisa den Hörer abnimmt, geht kein Fahrgast mehr verloren — die Disposition bekommt alles strukturiert."<cite>— Pilot-Kunde, Krankenbeförderung Düsseldorf</cite></blockquote>
 </div>
 
 <!-- ===== NEW: Branchen-Demos / Voice Agent Modelle ===== -->
 <section class="industry-sec">
   <div class="sec-wrap">
     <div class="sec-top reveal">
-      <div class="sec-tag">Branchen</div>
-      <h2 class="sec-h2">Für welche Betriebe ist Tawano gemacht?</h2>
-      <p class="sec-sub">Tawano wird individuell eingerichtet — Sprache, Abläufe und Weiterleitungen passend zu Ihrem Betrieb.</p>
+      <div class="sec-tag">Weitere Branchen</div>
+      <h2 class="sec-h2">Tawano für andere Betriebe</h2>
+      <p class="sec-sub">Tawano wird für jede Branche individuell eingerichtet — Sprache, Abläufe und Weiterleitungen passend zum Betrieb.</p>
     </div>
     <div class="ind-grid">
       <div class="ind-card reveal">
@@ -322,19 +322,6 @@ footer p{font-size:13px;color:#A3A3A3}
           <li>Notdienst oder Rückruf vorbereiten</li>
         </ul>
         <audio class="ind-audio" controls preload="metadata" data-track="shk"><source src="audio/shk.mp3" type="audio/mpeg"><source src="audio/shk.m4a" type="audio/mp4">Kein Audio-Support.</audio>
-        <button class="ind-cta" onclick="document.getElementById('phone').focus();window.scrollTo({top:0,behavior:'smooth'});">Testanruf erhalten &#8594;</button>
-      </div>
-      <div class="ind-card reveal">
-        <div class="ind-img-wrap">
-          <img src="img/krankenbefoerderung.jpg" alt="Krankenbeförderung" class="ind-img" onerror="this.style.display='none'">
-        </div>
-        <h3>Krankenbeförderung</h3>
-        <ul class="ind-list">
-          <li>Fahrtdaten und Adressen aufnehmen</li>
-          <li>Transportart und Termin abfragen</li>
-          <li>An Disposition weiterleiten</li>
-        </ul>
-        <audio class="ind-audio" controls preload="metadata" data-track="Krankenbeförderung"><source src="audio/krankenbefoerderung.mp3" type="audio/mpeg"><source src="audio/krankenbefoerderung.m4a" type="audio/mp4">Kein Audio-Support.</audio>
         <button class="ind-cta" onclick="document.getElementById('phone').focus();window.scrollTo({top:0,behavior:'smooth'});">Testanruf erhalten &#8594;</button>
       </div>
       <div class="ind-card reveal">
@@ -372,15 +359,15 @@ footer p{font-size:13px;color:#A3A3A3}
     <div class="live-sec">
       <div class="live-inner">
         <div class="live-left">
-          <h2>Erstgespräch buchen — wählen Sie direkt einen Termin.</h2>
-          <p>In 15 Minuten sehen Sie live, wie Tawano für Ihren Betrieb arbeitet. Keine Vorbereitung, kein Vertrag — einfach Termin auswählen.</p>
+          <h2>Erstgespräch buchen — sehen Sie Lisa live in Aktion.</h2>
+          <p>In 15 Minuten erleben Sie, wie Lisa Fahrtanfragen entgegennimmt und an Ihre Disposition weiterleitet. Keine Vorbereitung, kein Vertrag.</p>
           <div class="check-item">Termin sofort direkt im Kalender wählen</div>
-          <div class="check-item">Sie erleben live, wie natürlich die Gespräche klingen</div>
-          <div class="check-item">Danach wissen Sie, ob es für Ihren Betrieb passt</div>
+          <div class="check-item">Sie erleben live, wie natürlich Lisa klingt</div>
+          <div class="check-item">Danach wissen Sie, ob es für Ihr Unternehmen passt</div>
           <div style="margin-top:28px;padding:20px 22px;background:rgba(255,255,255,.06);border-radius:12px;border:1px solid rgba(255,255,255,.1);">
             <p style="font-size:14px;font-weight:700;color:#fff;margin:0 0 6px;">Lieber erst eine Frage stellen?</p>
             <p style="font-size:13px;color:#A3A3A3;margin:0 0 12px;line-height:1.6;">Kein Problem — schreiben Sie uns, wir antworten persönlich innerhalb von 24 Stunden. Kein Verkaufsgespräch, versprochen.</p>
-            <a onclick="document.getElementById('kontakt').scrollIntoView({behavior:'smooth'})" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#10B981;font-weight:700;cursor:pointer;text-decoration:none;border:1px solid rgba(16,185,129,.3);padding:8px 14px;border-radius:8px;transition:background .2s;" onmouseover="this.style.background='rgba(16,185,129,.08)'" onmouseout="this.style.background='transparent'">✉️ Zum Kontaktformular</a>
+            <a onclick="document.getElementById('kontakt').scrollIntoView({behavior:'smooth'})" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#3B82F6;font-weight:700;cursor:pointer;text-decoration:none;border:1px solid rgba(16,185,129,.3);padding:8px 14px;border-radius:8px;transition:background .2s;" onmouseover="this.style.background='rgba(16,185,129,.08)'" onmouseout="this.style.background='transparent'">✉️ Zum Kontaktformular</a>
           </div>
         </div>
         <div class="cal-embed-shell">
@@ -418,7 +405,7 @@ footer p{font-size:13px;color:#A3A3A3}
       </div>
       <div class="cmp-card cmp-card-tw reveal">
         <div class="cmp-card-head">
-          <div class="cmp-card-icon cmp-card-icon-tw"><svg viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+          <div class="cmp-card-icon cmp-card-icon-tw"><svg viewBox="0 0 24 24" fill="none" stroke="#1E40AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
           <div>
             <div class="cmp-card-title">Tawano Digitaler Mitarbeiter</div>
             <div class="cmp-card-sub">Denkt den Ablauf weiter</div>
@@ -441,51 +428,51 @@ footer p{font-size:13px;color:#A3A3A3}
 <section class="features-sec">
   <div class="sec-wrap">
     <div class="sec-top reveal">
-      <div class="sec-tag">Was Tawano macht</div>
-      <h2 class="sec-h2">Mehr als ein Anrufbeantworter.</h2>
-      <p class="sec-sub">Tawano nimmt Anrufe an, versteht das Anliegen und erledigt die nächsten Schritte — ohne dass Sie eingreifen müssen.</p>
+      <div class="sec-tag">Was Lisa macht</div>
+      <h2 class="sec-h2">Mehr als eine Vermittlung.</h2>
+      <p class="sec-sub">Lisa nimmt Fahrtanfragen an, erfasst Abholadresse, Ziel, Transportart und Termin — und übergibt alles strukturiert an Ihre Disposition.</p>
     </div>
     <div class="features-grid">
       <div class="feat-list">
         <div class="feat-item reveal">
           <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-          <div class="feat-text"><h3>Immer erreichbar — auch wenn Sie es nicht sind</h3><p>Kein Anruf bleibt unbeantwortet. Tawano ist rund um die Uhr erreichbar und klingt wie ein echter Mitarbeiter.</p></div>
+          <div class="feat-text"><h3>Rund um die Uhr erreichbar — auch nachts</h3><p>Kein Anruf bleibt unbeantwortet. Lisa nimmt Fahrtanfragen an — auch wenn Ihr Büro geschlossen ist.</p></div>
         </div>
         <div class="feat-item reveal">
           <div class="feat-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></div>
-          <div class="feat-text"><h3>Versteht sofort, worum es geht</h3><p>Tawano stellt die richtigen Fragen, erkennt ob es dringend ist — und sammelt alle Infos strukturiert.</p></div>
+          <div class="feat-text"><h3>Alle relevanten Daten werden erfasst</h3><p>Abholadresse, Zieladresse, Transportart, gewünschter Termin — Lisa fragt alles strukturiert ab, damit Ihre Disposition direkt loslegen kann.</p></div>
         </div>
         <div class="feat-item reveal">
           <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v12H5.17L4 17.17V4z"/><path d="M8 9h8M8 12h5"/></svg></div>
-          <div class="feat-text"><h3>Leitet alles strukturiert weiter</h3><p>Ihr Team bekommt nach jedem Anruf eine fertige Zusammenfassung — per Mail, SMS oder direkt ins System.</p></div>
+          <div class="feat-text"><h3>Sofortige Weitergabe an die Disposition</h3><p>Nach jedem Anruf bekommt Ihr Team eine fertige Zusammenfassung — per Mail, SMS oder direkt ins Dispositionssystem.</p></div>
         </div>
         <div class="feat-item reveal">
           <div class="feat-icon"><svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"/></svg></div>
-          <div class="feat-text"><h3>Startet automatisch die nächsten Schritte</h3><p>Terminbestätigung, Rückruf, Nachricht ans Team — Tawano setzt nach dem Gespräch direkt in Gang, was als Nächstes kommt.</p></div>
+          <div class="feat-text"><h3>Automatische Bestätigung an den Fahrgast</h3><p>Lisa sendet dem Fahrgast eine Bestätigungs-SMS — damit er weiß, dass seine Fahrt registriert wurde.</p></div>
         </div>
       </div>
       <div class="feat-visual reveal" aria-hidden="true">
         <div class="fv-head">
-          <span class="fv-title">Anruf-Protokoll · Heute</span>
+          <span class="fv-title">Fahrt-Protokoll · Heute</span>
           <span class="fv-live">Live</span>
         </div>
         <div class="call-row">
-          <div class="call-meta"><span class="call-name">Familie Becker</span><span class="call-sub">Heizung ausgefallen · vor 2 Min.</span></div>
-          <span class="call-tag tag-urgent">Notfall</span>
-        </div>
-        <div class="call-row">
-          <div class="call-meta"><span class="call-name">M. Schulz GmbH</span><span class="call-sub">Wartungstermin · vor 14 Min.</span></div>
+          <div class="call-meta"><span class="call-name">H. Müller</span><span class="call-sub">Fahrt Montag 09:00 · vor 3 Min.</span></div>
           <span class="call-tag tag-new">Neu</span>
         </div>
         <div class="call-row">
-          <div class="call-meta"><span class="call-name">Praxis Dr. Wagner</span><span class="call-sub">Fahrtanfrage · vor 32 Min.</span></div>
+          <div class="call-meta"><span class="call-name">Praxis Dr. Wagner</span><span class="call-sub">Rollstuhlfahrt · vor 11 Min.</span></div>
+          <span class="call-tag tag-urgent">Dringend</span>
+        </div>
+        <div class="call-row">
+          <div class="call-meta"><span class="call-name">E. Hoffmann</span><span class="call-sub">Dialyse-Fahrt Dienstag · vor 28 Min.</span></div>
           <span class="call-tag tag-new">Neu</span>
         </div>
         <div class="call-row">
-          <div class="call-meta"><span class="call-name">A. Fischer</span><span class="call-sub">Rückruf vereinbart · 09:14</span></div>
+          <div class="call-meta"><span class="call-name">R. Schmidt</span><span class="call-sub">Bestätigung gesendet · 08:42</span></div>
           <span class="call-tag tag-done">Erledigt</span>
         </div>
-        <div class="fv-foot"><span>12 Anrufe heute</span><span><strong>100%</strong> beantwortet</span></div>
+        <div class="fv-foot"><span>9 Fahrten heute</span><span><strong>100%</strong> erfasst</span></div>
       </div>
     </div>
   </div>
@@ -504,13 +491,13 @@ footer p{font-size:13px;color:#A3A3A3}
         <div class="how-num-bg">01</div>
         <div class="how-step">Schritt 1</div>
         <h3>Kurzes Erstgespräch</h3>
-        <p>Wir klären, welche Anrufe Sie bekommen, was Tawano fragen soll — und wie die nächsten Schritte aussehen.</p>
+        <p>Wir klären, wie Ihre Fahrtanfragen eingehen, was Lisa erfassen soll — und wie die Übergabe an Ihre Disposition aussehen soll.</p>
       </div>
       <div class="how-card reveal">
         <div class="how-num-bg">02</div>
         <div class="how-step">Schritt 2</div>
-        <h3>Tawano wird eingerichtet</h3>
-        <p>Wir richten Tawano mit Ihrer Begrüßung, Ihren Abläufen und den häufigsten Fällen ein — passend zu Ihrem Betrieb.</p>
+        <h3>Lisa wird eingerichtet</h3>
+        <p>Wir richten Lisa mit Ihrer Begrüßung, den Abfragefeldern und den Weiterleitungs-Regeln ein — passend zu Ihrem Betrieb.</p>
       </div>
       <div class="how-card reveal">
         <div class="how-num-bg">03</div>
@@ -574,25 +561,24 @@ footer p{font-size:13px;color:#A3A3A3}
   <div class="sec-wrap">
     <div class="sec-top reveal">
       <div class="sec-tag">Über uns</div>
-      <h2 class="sec-h2">Wer hinter Tawano steckt.</h2>
-    </div>
+      <h2 class="sec-h2">Wer hinter Tawano steckt.</h2>    </div>
     <div class="about-wrap">
-      <p class="reveal">Tawano baut digitale Mitarbeiter für Betriebe, die jeden Anruf beantworten wollen — ohne mehr Personal einzustellen. Wir arbeiten mit lokalen Dienstleistern und bauen Lösungen, die im echten Alltag funktionieren.</p>
+      <p class="reveal">Tawano baut digitale Mitarbeiter für Krankenbeförderungs-Unternehmen und Mobilitätsdienstleister, die keinen Anruf mehr verpassen wollen. Lisa übernimmt die Fahrtannahme — zuverlässig, rund um die Uhr.</p>
       <div class="trust-grid">
         <div class="trust-card reveal">
           <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <p>Für lokale Betriebe — nicht für Konzerne</p>
+          <p>Für Krankenbeförderung — nicht für Konzerne</p>
         </div>
         <div class="trust-card reveal">
           <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          <p>Echte Anrufe — keine Demo-Spielerei</p>
+          <p>Echte Fahrtannahme — keine Demo-Spielerei</p>
         </div>
         <div class="trust-card reveal">
           <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
           <p>Einrichtung und Betreuung aus einer Hand</p>
         </div>
       </div>
-      <button class="about-cta reveal" onclick="document.getElementById('phone').focus();window.scrollTo({top:0,behavior:'smooth'});">Kostenlosen Testanruf starten &#8594;</button>
+      <button class="about-cta reveal" onclick="document.getElementById('phone').focus();window.scrollTo({top:0,behavior:'smooth'});">Kostenlosen Testanruf mit Lisa starten &#8594;</button>
     </div>
   </div>
 </section>
@@ -628,8 +614,8 @@ footer p{font-size:13px;color:#A3A3A3}
 
 <section class="final">
   <div class="sec-wrap">
-    <h2>Hören Sie auf, Aufträge zu verlieren.</h2>
-    <p>15 Minuten. Konkrete Live-Demo.</p>
+    <h2>Hören Sie auf, Fahrten zu verlieren.</h2>
+    <p>15 Minuten. Konkrete Live-Demo mit Lisa.</p>
     <div class="final-btns">
       <button class="btn-final-primary" onclick="document.getElementById('live').scrollIntoView({behavior:'smooth'})">Demo buchen →</button>
       <button class="btn-final-secondary" onclick="document.getElementById('kontakt').scrollIntoView({behavior:'smooth'})">Fragen stellen</button>
@@ -640,7 +626,7 @@ footer p{font-size:13px;color:#A3A3A3}
 <footer>
   <div class="footer-inner">
     <a href="/" class="logo">tawa<span>no</span></a>
-    <p>KI-Telefonservice · Düsseldorf, NRW</p>
+    <p>KI-Telefonservice · Krankenbeförderung · Düsseldorf, NRW</p>
     <div class="footer-links">
       <a onclick="openModal('impressum');return false;">Impressum</a>
       <a onclick="openModal('datenschutz');return false;">Datenschutz</a>

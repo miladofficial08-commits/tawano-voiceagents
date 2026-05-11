@@ -760,10 +760,10 @@ async function triggerCall(){
         else{clearInterval(_cdTimer);msg.className='call-msg success';msg.textContent='\u2713 Ihr Telefon sollte jetzt klingeln!';}
       },1000);
     } else {
-      msg.className='call-msg error';msg.textContent='Fehler: '+(data.message||'Anruf konnte nicht gestartet werden.');btn.disabled=false;
+      msg.className='call-msg error';msg.textContent='Fehler: '+(data.message||data.errorMessage||'Anruf konnte nicht gestartet werden.');btn.disabled=false;
     }
   } catch(e){
-    msg.className='call-msg error';msg.textContent='Verbindungsfehler. Bitte versuchen Sie es erneut.';btn.disabled=false;
+    msg.className='call-msg error';msg.textContent='Verbindungsfehler: '+e.message;btn.disabled=false;
   }
 }
 

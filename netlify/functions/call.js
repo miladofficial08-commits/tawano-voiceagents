@@ -1,5 +1,13 @@
 const crypto = require('crypto');
-const { KEYS, LIMITS, appendLimited } = require('./_store');
+
+// Lazy-load store so a blobs failure never blocks the actual call
+let _store;
+function getStore() {
+  if (!_store) {
+    try { _store = require('./_store'); } catch (e) { _store = null; }
+  }
+  return _store;
+}
 
 const headers = {
   'Access-Control-Allow-Origin': '*',
@@ -70,19 +78,22 @@ exports.handler = async (event) => {
     }
 
     try {
-      await appendLimited(KEYS.calls, {
-        debugId,
-        callSid: data.call_id || null,
-        createdAt,
-        updatedAt: new Date().toISOString(),
-        requestedAgentId: agentId || 'tawano-general',
-        resolvedAgentId,
-        phoneNumber,
-        status: data.call_status || 'registered',
-        retellStatus: data.call_status || null,
-        telephonyIdentifier: data.telephony_identifier || null,
-        events: [{ at: createdAt, type: 'retell_registered', callSid: data.call_id || null }],
-      }, LIMITS.calls);
+      const store = getStore();
+      if (store) {
+        await store.appendLimited(store.KEYS.calls, {
+          debugId,
+          callSid: data.call_id || null,
+          createdAt,
+          updatedAt: new Date().toISOString(),
+          requestedAgentId: agentId || 'tawano-general',
+          resolvedAgentId,
+          phoneNumber,
+          status: data.call_status || 'registered',
+          retellStatus: data.call_status || null,
+          telephonyIdentifier: data.telephony_identifier || null,
+          events: [{ at: createdAt, type: 'retell_registered', callSid: data.call_id || null }],
+        }, store.LIMITS.calls);
+      }
     } catch (storeError) {
       // Keep call flow intact even if dashboard persistence fails.
       console.error('Failed to persist debug call record:', storeError);

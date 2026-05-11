@@ -1,3 +1,6 @@
+const crypto = require('crypto');
+const { KEYS, LIMITS, appendLimited } = require('./_store');
+
 const headers = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
@@ -14,16 +17,22 @@ exports.handler = async (event) => {
 
   const RETELL_API_KEY = process.env.RETELL_API_KEY || '';
   const RETELL_FROM_NUMBER = process.env.RETELL_FROM_NUMBER || '';
+  const DEFAULT_TAWANO_AGENT = 'agent_6cada34aac5785c950da3d919b';
+  const DEFAULT_KRANKEN_AGENT = 'agent_69344ddb9d60cf9fa9f6a30aa0';
   const RETELL_AGENT_IDS = {
-    'tawano-general':  process.env.RETELL_AGENT_TAWANO   || process.env.RETELL_AGENT_DEFAULT || '',
+    'tawano-general':  process.env.RETELL_AGENT_TAWANO   || DEFAULT_TAWANO_AGENT,
     'handwerker-demo': process.env.RETELL_AGENT_HANDWERKER || process.env.RETELL_AGENT_DEFAULT || '',
-    'punkt24-demo':    process.env.RETELL_AGENT_KRANKEN   || process.env.RETELL_AGENT_DEFAULT || '',
+    'punkt24-demo':    process.env.RETELL_AGENT_KRANKEN   || DEFAULT_KRANKEN_AGENT,
   };
 
   let body;
   try { body = JSON.parse(event.body || '{}'); } catch(e) { body = {}; }
 
   const { agentId, phoneNumber } = body;
+  const debugId = typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : crypto.randomBytes(12).toString('hex');
+  const createdAt = new Date().toISOString();
 
   if (!phoneNumber) {
     return { statusCode: 400, headers, body: JSON.stringify({ ok: false, message: 'phoneNumber is required' }) };
@@ -35,7 +44,7 @@ exports.handler = async (event) => {
     return { statusCode: 500, headers, body: JSON.stringify({ ok: false, message: 'RETELL_FROM_NUMBER not configured' }) };
   }
 
-  const resolvedAgentId = RETELL_AGENT_IDS[agentId] || process.env.RETELL_AGENT_DEFAULT || '';
+  const resolvedAgentId = RETELL_AGENT_IDS[agentId] || process.env.RETELL_AGENT_DEFAULT || DEFAULT_TAWANO_AGENT;
   if (!resolvedAgentId) {
     return { statusCode: 500, headers, body: JSON.stringify({ ok: false, message: 'No Retell agent configured for: ' + agentId }) };
   }
@@ -60,7 +69,30 @@ exports.handler = async (event) => {
       return { statusCode: 502, headers, body: JSON.stringify({ ok: false, message: data.message || 'Retell call failed' }) };
     }
 
-    return { statusCode: 200, headers, body: JSON.stringify({ ok: true, callSid: data.call_id, callStatus: data.call_status || null }) };
+    try {
+      await appendLimited(KEYS.calls, {
+        debugId,
+        callSid: data.call_id || null,
+        createdAt,
+        updatedAt: new Date().toISOString(),
+        requestedAgentId: agentId || 'tawano-general',
+        resolvedAgentId,
+        phoneNumber,
+        status: data.call_status || 'registered',
+        retellStatus: data.call_status || null,
+        telephonyIdentifier: data.telephony_identifier || null,
+        events: [{ at: createdAt, type: 'retell_registered', callSid: data.call_id || null }],
+      }, LIMITS.calls);
+    } catch (storeError) {
+      // Keep call flow intact even if dashboard persistence fails.
+      console.error('Failed to persist debug call record:', storeError);
+    }
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ ok: true, debugId, callSid: data.call_id, callStatus: data.call_status || null }),
+    };
   } catch (err) {
     return { statusCode: 500, headers, body: JSON.stringify({ ok: false, message: 'Could not reach Retell API' }) };
   }

@@ -15,6 +15,18 @@
   force = true
 
 [[redirects]]
+  from = "/api/debug/calls"
+  to = "/.netlify/functions/debug-calls"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/analytics"
+  to = "/.netlify/functions/analytics"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/call/*/end"
   to = "/.netlify/functions/call"
   status = 200

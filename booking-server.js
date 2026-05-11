@@ -19,11 +19,13 @@ const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
 const RETELL_API_KEY = process.env.RETELL_API_KEY || '';
 const RETELL_FROM_NUMBER = process.env.RETELL_FROM_NUMBER || '';
 const RETELL_WEBHOOK_SECRET = process.env.RETELL_WEBHOOK_SECRET || '';
+const DEFAULT_TAWANO_AGENT = 'agent_6cada34aac5785c950da3d919b';
+const DEFAULT_KRANKEN_AGENT = 'agent_69344ddb9d60cf9fa9f6a30aa0';
 // Agent IDs per page — set in .env or fall back to one default
 const RETELL_AGENT_IDS = {
-  'tawano-general':    process.env.RETELL_AGENT_TAWANO       || process.env.RETELL_AGENT_DEFAULT || '',
+  'tawano-general':    process.env.RETELL_AGENT_TAWANO       || DEFAULT_TAWANO_AGENT,
   'handwerker-demo':   process.env.RETELL_AGENT_HANDWERKER   || process.env.RETELL_AGENT_DEFAULT || '',
-  'punkt24-demo':      process.env.RETELL_AGENT_KRANKEN       || process.env.RETELL_AGENT_DEFAULT || '',
+  'punkt24-demo':      process.env.RETELL_AGENT_KRANKEN       || DEFAULT_KRANKEN_AGENT,
 };
 
 // seven.io SMS config

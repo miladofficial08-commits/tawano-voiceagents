@@ -224,7 +224,7 @@ td.phone{font-weight:700;color:#111827;font-size:14px}
   <!-- Settings -->
   <div class="settings-bar">
     <label for="server-url">Server-URL</label>
-    <input type="text" id="server-url" value="http://localhost:8787" placeholder="http://localhost:8787">
+    <input type="text" id="server-url" value="" placeholder="https://tawanoai.netlify.app oder http://localhost:8787">
     <select id="refresh-interval">
       <option value="0">Kein Auto-Refresh</option>
       <option value="5000">Alle 5 Sek.</option>
@@ -371,10 +371,18 @@ let allCalls = [];
 let activeFilter = 'all';
 let expandedRow = null;
 let refreshTimer = null;
+const LIVE_SERVER_URL = 'https://tawanoai.netlify.app';
+
+function defaultServerUrl() {
+  const host = location.hostname || '';
+  if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:8787';
+  if (host.includes('netlify.app')) return location.origin;
+  return LIVE_SERVER_URL;
+}
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 function serverUrl() {
-  return (document.getElementById('server-url').value || 'http://localhost:8787').replace(/\/$/, '');
+  return (document.getElementById('server-url').value || defaultServerUrl()).replace(/\/$/, '');
 }
 
 function setConnStatus(state, text) {
@@ -450,7 +458,10 @@ async function loadCalls() {
   setConnStatus('', 'Verbinde...');
 
   try {
-    const res = await fetch(serverUrl() + '/api/debug/calls', { cache: 'no-store' });
+    let res = await fetch(serverUrl() + '/api/debug/calls', { cache: 'no-store' });
+    if (res.status === 404) {
+      res = await fetch(serverUrl() + '/.netlify/functions/debug-calls', { cache: 'no-store' });
+    }
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     allCalls = json.calls || [];
@@ -857,7 +868,10 @@ let analyticsData = [];
 
 async function loadAnalytics() {
   try {
-    const res = await fetch(serverUrl() + '/api/analytics?limit=5000', { cache: 'no-store' });
+    let res = await fetch(serverUrl() + '/api/analytics?limit=5000', { cache: 'no-store' });
+    if (res.status === 404) {
+      res = await fetch(serverUrl() + '/.netlify/functions/analytics?limit=5000', { cache: 'no-store' });
+    }
     const data = await res.json();
     if (!res.ok || !data.ok) throw new Error('HTTP ' + res.status);
     analyticsData = data.events || [];
@@ -1044,6 +1058,7 @@ function applySettings() {
 }
 
 // init
+document.getElementById('server-url').value = defaultServerUrl();
 applySettings();
 </script>
 </body>

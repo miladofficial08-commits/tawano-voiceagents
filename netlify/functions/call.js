@@ -27,10 +27,12 @@ exports.handler = async (event) => {
   const RETELL_FROM_NUMBER = process.env.RETELL_FROM_NUMBER || '';
   const DEFAULT_TAWANO_AGENT = 'agent_6cada34aac5785c950da3d919b';
   const DEFAULT_KRANKEN_AGENT = 'agent_69344ddb9d60cf9fa9f6a30aa0';
+  const DEFAULT_BEAUTY_AGENT = 'agent_2b923be111a55cac5e2ac3d547';
   const RETELL_AGENT_IDS = {
-    'tawano-general':  process.env.RETELL_AGENT_TAWANO   || DEFAULT_TAWANO_AGENT,
-    'handwerker-demo': process.env.RETELL_AGENT_HANDWERKER || process.env.RETELL_AGENT_DEFAULT || '',
-    'punkt24-demo':    process.env.RETELL_AGENT_KRANKEN   || DEFAULT_KRANKEN_AGENT,
+    'tawano-general':    process.env.RETELL_AGENT_TAWANO      || DEFAULT_TAWANO_AGENT,
+    'handwerker-demo':  process.env.RETELL_AGENT_HANDWERKER  || process.env.RETELL_AGENT_DEFAULT || '',
+    'punkt24-demo':     process.env.RETELL_AGENT_KRANKEN     || DEFAULT_KRANKEN_AGENT,
+    'beautyworlds-demo': process.env.RETELL_AGENT_BEAUTY     || DEFAULT_BEAUTY_AGENT,
   };
 
   let body;
@@ -52,7 +54,10 @@ exports.handler = async (event) => {
     return { statusCode: 500, headers, body: JSON.stringify({ ok: false, message: 'RETELL_FROM_NUMBER not configured' }) };
   }
 
-  const resolvedAgentId = RETELL_AGENT_IDS[agentId] || process.env.RETELL_AGENT_DEFAULT || DEFAULT_TAWANO_AGENT;
+  const isDirectAgentId = typeof agentId === 'string' && /^agent_[a-zA-Z0-9]+$/.test(agentId);
+  const resolvedAgentId = isDirectAgentId
+    ? agentId
+    : (RETELL_AGENT_IDS[agentId] || process.env.RETELL_AGENT_DEFAULT || DEFAULT_TAWANO_AGENT);
   if (!resolvedAgentId) {
     return { statusCode: 500, headers, body: JSON.stringify({ ok: false, message: 'No Retell agent configured for: ' + agentId }) };
   }
@@ -68,6 +73,10 @@ exports.handler = async (event) => {
         override_agent_id: resolvedAgentId,
         from_number: RETELL_FROM_NUMBER,
         to_number: phoneNumber,
+        metadata: {
+          debug_id: debugId,
+          website_agent_id: agentId || 'unknown',
+        },
       }),
     });
 

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beautyworlds Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#f8f5f2;color:#2b2b2b;min-height:100vh;-webkit-font-smoothing:antialiased}
+.top{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #efe4d9}
+.top-wrap{max-width:1040px;margin:0 auto;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.brand{font-size:22px;font-weight:800;color:#6f2f1f}
+.brand span{color:#cf7a4e}
+.status{display:flex;align-items:center;gap:8px;font-size:13px;color:#6b7280;font-weight:600}
+.dot{width:9px;height:9px;border-radius:999px;background:#d1d5db}
+.dot.ok{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.14)}
+.dot.err{background:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.12)}
+.main{max-width:1040px;margin:0 auto;padding:18px 16px 36px}
+.hero{background:linear-gradient(145deg,#fff8f2,#fff4ea);border:1px solid #f1dfcf;border-radius:16px;padding:18px;margin-bottom:14px}
+.hero h1{font-size:27px;letter-spacing:-.5px;color:#6f2f1f;margin-bottom:6px}
+.hero p{font-size:14px;color:#7c6658}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:#fff;border:1px solid #efe4d9;border-radius:14px;padding:14px}
+.panel h2{font-size:17px;color:#6f2f1f;margin-bottom:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input,select{border:1.5px solid #ead2be;border-radius:10px;padding:10px 12px;font-size:14px;font-family:'Inter',sans-serif;outline:none;background:#fff;color:#2b2b2b}
+input:focus,select:focus{border-color:#cf7a4e;box-shadow:0 0 0 4px rgba(207,122,78,.12)}
+input[type='tel']{flex:1;min-width:220px}
+.btn{border:none;border-radius:10px;padding:11px 14px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s all;font-family:'Inter',sans-serif}
+.btn-main{background:#cf7a4e;color:#fff}
+.btn-main:hover{background:#be683d}
+.btn-ghost{background:#fff;border:1.5px solid #ead2be;color:#8a4d31}
+.btn-ghost:hover{background:#fff6ee}
+.agent-box{background:#fff8f2;border:1px dashed #ebd7c5;color:#8a4d31;border-radius:10px;padding:10px;font-size:13px;margin-bottom:10px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+@media(max-width:860px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:#fff;border:1px solid #efe4d9;border-radius:12px;padding:12px}
+.kpi .l{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:#a28774;font-weight:700}
+.kpi .v{font-size:30px;line-height:1;font-weight:800;color:#5a2b1d;margin-top:5px}
+.kpi .s{font-size:12px;color:#8f7a69;margin-top:5px}
+.msg{margin-top:9px;font-size:13px;font-weight:600;display:none}
+.msg.ok{display:block;color:#047857}
+.msg.err{display:block;color:#b91c1c}
+.table-wrap{margin-top:10px;border:1px solid #f1e6db;border-radius:10px;overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:660px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #f8eee6;font-size:13px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#a28774;background:#fffbf8}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.badge::before{content:'';width:6px;height:6px;border-radius:999px;background:currentColor;opacity:.8}
+.b-live{background:#dcfce7;color:#166534}
+.b-end{background:#e0f2fe;color:#075985}
+.b-problem{background:#fee2e2;color:#991b1b}
+.b-wait{background:#fef3c7;color:#92400e}
+.muted{font-size:12px;color:#8f7a69;margin-top:8px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-wrap">
+    <div class="brand">Beautyworlds <span>Dashboard</span></div>
+    <div class="status"><span id="dot" class="dot"></span><span id="status-text">Verbinde...</span></div>
+  </div>
+</header>
+
+<main class="main">
+  <section class="hero">
+    <h1>Einfacher Ueberblick fuer dein Studio</h1>
+    <p>Nur die Daten von deinem Voice Agent. Keine Technik-Details, nur das Wichtige.</p>
+  </section>
+
+  <section class="grid">
+    <section class="panel">
+      <h2>Kundenanruf starten</h2>
+      <div class="agent-box">Fester Agent: <strong id="agent-id-view"></strong></div>
+      <div class="row" style="margin-bottom:8px">
+        <input id="phone" type="tel" placeholder="Telefonnummer z.B. +4917612345678">
+      </div>
+      <div class="row" style="margin-bottom:8px">
+        <button class="btn btn-main" onclick="startCall()">Jetzt anrufen</button>
+        <button class="btn btn-ghost" onclick="refreshCalls()">Daten aktualisieren</button>
+      </div>
+      <div id="call-msg" class="msg"></div>
+      <div class="muted">Hinweis: Der Kunde wird vom Beautyworlds Agent direkt angerufen.</div>
+    </section>
+
+    <section class="panel">
+      <h2>Heute</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Live</div><div class="v" id="k-live">0</div><div class="s">Aktive Calls</div></div>
+        <div class="kpi"><div class="l">Heute Calls</div><div class="v" id="k-today">0</div><div class="s">Gestartet</div></div>
+        <div class="kpi"><div class="l">Beendet</div><div class="v" id="k-ended">0</div><div class="s">Abgeschlossen</div></div>
+        <div class="kpi"><div class="l">Probleme</div><div class="v" id="k-problem">0</div><div class="s">Fehler/Abbruch</div></div>
+      </div>
+      <div class="muted" id="k-note">Es werden nur Daten fuer diesen Agenten gezeigt.</div>
+    </section>
+  </section>
+
+  <section class="panel" style="margin-top:12px">
+    <h2>Letzte Anrufe dieses Agenten</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Rufnummer</th>
+            <th>Start</th>
+            <th>Dauer</th>
+            <th>Letzte Aktivitaet</th>
+            <th>Call ID</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="6">Noch keine Daten geladen.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+const AGENT_ALIAS = 'beautyworlds-demo';
+const AGENT_ID    = 'agent_2b923be111a55cac5e2ac3d547';
+const LIVE_SERVER_URL = 'https://tawanoai.netlify.app';
+let calls = [];
+let timer = null;
+
+function defaultServerUrl() {
+  const host = location.hostname || '';
+  if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:8787';
+  if (host.includes('netlify.app')) return location.origin;
+  return LIVE_SERVER_URL;
+}
+
+function serverUrl() {
+  return defaultServerUrl().replace(/\/$/, '');
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('dot');
+  dot.className = 'dot' + (state ? ' ' + state : '');
+  document.getElementById('status-text').textContent = text;
+}
+
+function showMsg(text, type) {
+  const el = document.getElementById('call-msg');
+  el.className = 'msg ' + type;
+  el.textContent = text;
+}
+
+function escHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function fmtTime(iso) {
+  if (!iso) return '-';
+  return new Date(iso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+}
+
+function fmtDuration(ms) {
+  if (!ms) return '-';
+  const sec = Math.max(0, Math.round(ms / 1000));
+  const min = Math.floor(sec / 60);
+  const rest = sec % 60;
+  return min > 0 ? (min + 'm ' + rest + 's') : (rest + ' Sek.');
+}
+
+function timeAgo(iso) {
+  if (!iso) return '-';
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (diff < 1) return 'gerade eben';
+  if (diff < 60) return 'vor ' + diff + ' Min.';
+  const h = Math.floor(diff / 60);
+  return 'vor ' + h + ' Std.';
+}
+
+function badgeInfo(status) {
+  const s = String(status || '').toLowerCase();
+  if (s === 'ongoing' || s === 'in-progress' || s === 'starting' || s === 'registered') return ['Live', 'b-live'];
+  if (s === 'ended' || s === 'completed') return ['Beendet', 'b-end'];
+  if (s.includes('error') || s.includes('network')) return ['Problem', 'b-problem'];
+  return ['Wartet', 'b-wait'];
+}
+
+function isToday(iso) {
+  if (!iso) return false;
+  const a = new Date(iso);
+  const b = new Date();
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function isAgentCall(call) {
+  return (call.requestedAgentId === AGENT_ID) || (call.resolvedAgentId === AGENT_ID);
+}
+
+async function startCall() {
+  const phone = (document.getElementById('phone').value || '').trim();
+  if (!phone) {
+    showMsg('Bitte eine Telefonnummer eingeben.', 'err');
+    return;
+  }
+
+  showMsg('Anruf wird gestartet...', 'ok');
+  try {
+    const res = await fetch(serverUrl() + '/api/call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agentId: AGENT_ALIAS, phoneNumber: phone })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      throw new Error(data.message || 'Anruf konnte nicht gestartet werden');
+    }
+    showMsg('Anruf gestartet. Call ID: ' + (data.callSid || '-'), 'ok');
+    refreshCalls();
+  } catch (err) {
+    showMsg('Fehler: ' + err.message, 'err');
+  }
+}
+
+async function refreshCalls() {
+  setStatus('', 'Lade Daten...');
+  try {
+    let res = await fetch(serverUrl() + '/api/debug/calls', { cache: 'no-store' });
+    if (res.status === 404) {
+      res = await fetch(serverUrl() + '/.netlify/functions/debug-calls', { cache: 'no-store' });
+    }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    calls = (Array.isArray(data.calls) ? data.calls : []).filter(isAgentCall);
+    render();
+    setStatus('ok', 'Live verbunden');
+  } catch (err) {
+    setStatus('err', 'Verbindungsfehler');
+    console.error(err);
+  }
+}
+
+function render() {
+  const today = calls.filter(c => isToday(c.createdAt));
+  const live = today.filter(c => ['ongoing', 'in-progress', 'starting', 'registered'].includes(String(c.status || '').toLowerCase())).length;
+  const ended = today.filter(c => ['ended', 'completed'].includes(String(c.status || '').toLowerCase())).length;
+  const problem = today.filter(c => String(c.status || '').toLowerCase().includes('error') || String(c.status || '').toLowerCase().includes('network')).length;
+
+  document.getElementById('k-live').textContent = String(live);
+  document.getElementById('k-today').textContent = String(today.length);
+  document.getElementById('k-ended').textContent = String(ended);
+  document.getElementById('k-problem').textContent = String(problem);
+
+  document.getElementById('k-note').textContent = calls.length
+    ? 'Es werden nur Daten fuer Agent ' + AGENT_ID + ' gezeigt.'
+    : 'Noch keine Calls fuer diesen Agenten vorhanden.';
+
+  const rows = calls.slice(0, 30).map(c => {
+    const b = badgeInfo(c.status);
+    return '<tr>' +
+      '<td><span class="badge ' + b[1] + '">' + b[0] + '</span></td>' +
+      '<td>' + escHtml(c.phoneNumber || '-') + '</td>' +
+      '<td>' + escHtml(fmtTime(c.createdAt)) + '</td>' +
+      '<td>' + escHtml(fmtDuration(c.durationMs)) + '</td>' +
+      '<td>' + escHtml(timeAgo(c.updatedAt || c.createdAt)) + '</td>' +
+      '<td>' + escHtml((c.callSid || '-').slice(0, 18)) + '</td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById('rows').innerHTML = rows || '<tr><td colspan="6">Noch keine Calls fuer diesen Agenten.</td></tr>';
+}
+
+document.getElementById('agent-id-view').textContent = AGENT_ID;
+refreshCalls();
+if (timer) clearInterval(timer);
+timer = setInterval(refreshCalls, 10000);
+</script>
+</body>
+</html>

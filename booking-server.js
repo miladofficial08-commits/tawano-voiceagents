@@ -21,11 +21,13 @@ const RETELL_FROM_NUMBER = process.env.RETELL_FROM_NUMBER || '';
 const RETELL_WEBHOOK_SECRET = process.env.RETELL_WEBHOOK_SECRET || '';
 const DEFAULT_TAWANO_AGENT = 'agent_6cada34aac5785c950da3d919b';
 const DEFAULT_KRANKEN_AGENT = 'agent_69344ddb9d60cf9fa9f6a30aa0';
+const DEFAULT_BEAUTY_AGENT  = 'agent_2b923be111a55cac5e2ac3d547';
 // Agent IDs per page — set in .env or fall back to one default
 const RETELL_AGENT_IDS = {
-  'tawano-general':    process.env.RETELL_AGENT_TAWANO       || DEFAULT_TAWANO_AGENT,
-  'handwerker-demo':   process.env.RETELL_AGENT_HANDWERKER   || process.env.RETELL_AGENT_DEFAULT || '',
-  'punkt24-demo':      process.env.RETELL_AGENT_KRANKEN       || DEFAULT_KRANKEN_AGENT,
+  'tawano-general':     process.env.RETELL_AGENT_TAWANO      || DEFAULT_TAWANO_AGENT,
+  'handwerker-demo':    process.env.RETELL_AGENT_HANDWERKER  || process.env.RETELL_AGENT_DEFAULT || '',
+  'punkt24-demo':       process.env.RETELL_AGENT_KRANKEN     || DEFAULT_KRANKEN_AGENT,
+  'beautyworlds-demo':  process.env.RETELL_AGENT_BEAUTY      || DEFAULT_BEAUTY_AGENT,
 };
 
 // seven.io SMS config
@@ -63,6 +65,7 @@ app.use(express.static(path.join(__dirname)));
 app.get('/handwerker', (_, res) => res.sendFile(path.join(__dirname, 'handwerker.html')));
 app.get('/krankenbefoerderung', (_, res) => res.sendFile(path.join(__dirname, 'krankenbefoerderung.html')));
 app.get('/dashboard', (_, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
+app.get('/beautyworlds-dashboard', (_, res) => res.sendFile(path.join(__dirname, 'beautyworlds-dashboard.html')));
 
 app.get('/health', (_, res) => {
   res.json({ ok: true, smsEnabled: SMS_ENABLED });
@@ -175,7 +178,10 @@ app.post('/api/call', async (req, res) => {
     return res.status(500).json({ ok: false, message: 'RETELL_FROM_NUMBER not configured' });
   }
 
-  const resolvedAgentId = RETELL_AGENT_IDS[agentId] || process.env.RETELL_AGENT_DEFAULT || '';
+  const isDirectAgentId = typeof agentId === 'string' && /^agent_[a-zA-Z0-9]+$/.test(agentId);
+  const resolvedAgentId = isDirectAgentId
+    ? agentId
+    : (RETELL_AGENT_IDS[agentId] || process.env.RETELL_AGENT_DEFAULT || '');
   if (!resolvedAgentId) {
     return res.status(500).json({ ok: false, message: 'No Retell agent ID configured for: ' + agentId });
   }

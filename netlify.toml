@@ -46,3 +46,8 @@
   from = "/krankenbefoerderung"
   to = "/krankenbefoerderung.html"
   status = 200
+
+[[redirects]]
+  from = "/beautyworlds-dashboard"
+  to = "/beautyworlds-dashboard.html"
+  status = 200

@@ -46,5 +46,13 @@
     "page": "tawano",
     "milestone": 25,
     "receivedAt": "2026-05-10T22:37:18.915Z"
+  },
+  {
+    "type": "page_view",
+    "session": "389l988s3",
+    "ts": "2026-05-12T20:14:24.697Z",
+    "page": "tawano",
+    "ref": "",
+    "receivedAt": "2026-05-12T20:14:24.724Z"
   }
 ]

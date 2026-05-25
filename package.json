@@ -4,6 +4,7 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
+    "dev": "node booking-server.js",
     "start": "node booking-server.js"
   },
   "dependencies": {

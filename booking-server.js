@@ -8,11 +8,16 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const port = Number(process.env.PORT || 8787);
+const port = Number(process.env.PORT || 4000);
 
-const senderEmail = process.env.GMAIL_SENDER_EMAIL;
-const appPassword = process.env.GMAIL_SENDER_APP_PASSWORD;
-const notifyEmail = process.env.BOOKING_NOTIFY_EMAIL || senderEmail;
+const smtpHost = process.env.SMTP_HOST;
+const smtpPort = Number(process.env.SMTP_PORT || 587);
+const smtpSecure = String(process.env.SMTP_SECURE || 'false').toLowerCase() === 'true';
+const smtpRequireTLS = String(process.env.SMTP_REQUIRE_TLS || 'true').toLowerCase() === 'true';
+const smtpUser = process.env.SMTP_USER;
+const smtpPass = process.env.SMTP_PASS;
+const smtpFrom = process.env.SMTP_FROM || `Tawano <${smtpUser || ''}>`;
+const notifyEmail = process.env.CONTACT_RECEIVER || smtpUser;
 const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
 
 // Retell AI config
@@ -42,16 +47,19 @@ const MAX_ANALYTICS = 10000;
 const analyticsFile = path.join(__dirname, 'data', 'analytics-events.json');
 const analyticsEvents = loadAnalyticsEvents();
 
-if (!senderEmail || !appPassword) {
-  console.error('Missing SMTP credentials. Set GMAIL_SENDER_EMAIL and GMAIL_SENDER_APP_PASSWORD in .env');
+if (!smtpHost || !smtpUser || !smtpPass || !notifyEmail) {
+  console.error('Missing SMTP credentials. Set SMTP_HOST, SMTP_USER, SMTP_PASS and CONTACT_RECEIVER in .env');
   process.exit(1);
 }
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: smtpHost,
+  port: smtpPort,
+  secure: smtpSecure,
+  requireTLS: smtpRequireTLS,
   auth: {
-    user: senderEmail,
-    pass: appPassword,
+    user: smtpUser,
+    pass: smtpPass,
   },
 });
 
@@ -381,7 +389,7 @@ app.post('/api/demo-booking', async (req, res) => {
 
   try {
     await transporter.sendMail({
-      from: `Tawano Website <${senderEmail}>`,
+      from: smtpFrom,
       to: notifyEmail,
       replyTo: email,
       subject: internalSubject,
@@ -390,7 +398,7 @@ app.post('/api/demo-booking', async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: `Tawano <${senderEmail}>`,
+      from: smtpFrom,
       to: email,
       subject: customerSubject,
       text: customerTextBody,

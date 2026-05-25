@@ -23,11 +23,16 @@ exports.handler = async (event) => {
     return { statusCode: 405, headers, body: JSON.stringify({ ok: false, message: 'Method not allowed' }) };
   }
 
-  const senderEmail = process.env.GMAIL_SENDER_EMAIL;
-  const appPassword = process.env.GMAIL_SENDER_APP_PASSWORD;
-  const notifyEmail = process.env.BOOKING_NOTIFY_EMAIL || senderEmail;
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = Number(process.env.SMTP_PORT || 587);
+  const smtpSecure = String(process.env.SMTP_SECURE || 'false').toLowerCase() === 'true';
+  const smtpRequireTLS = String(process.env.SMTP_REQUIRE_TLS || 'true').toLowerCase() === 'true';
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const smtpFrom = process.env.SMTP_FROM || `Tawano <${smtpUser || ''}>`;
+  const notifyEmail = process.env.CONTACT_RECEIVER || smtpUser;
 
-  if (!senderEmail || !appPassword) {
+  if (!smtpHost || !smtpUser || !smtpPass || !notifyEmail) {
     return { statusCode: 500, headers, body: JSON.stringify({ ok: false, message: 'SMTP not configured' }) };
   }
 
@@ -45,8 +50,11 @@ exports.handler = async (event) => {
   const cleanSource = typeof sourcePage === 'string' && sourcePage.trim() ? sourcePage.trim() : 'unbekannt';
 
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user: senderEmail, pass: appPassword },
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpSecure,
+    requireTLS: smtpRequireTLS,
+    auth: { user: smtpUser, pass: smtpPass },
   });
 
   const internalHtml = `
@@ -73,7 +81,7 @@ exports.handler = async (event) => {
 
   try {
     await transporter.sendMail({
-      from: `Tawano Website <${senderEmail}>`,
+      from: smtpFrom,
       to: notifyEmail,
       replyTo: email,
       subject: `Neue Buchung/Nachricht: ${name} (${company})`,
@@ -82,7 +90,7 @@ exports.handler = async (event) => {
     });
 
     await transporter.sendMail({
-      from: `Tawano <${senderEmail}>`,
+      from: smtpFrom,
       to: email,
       subject: 'Ihre Anfrage bei Tawano',
       text: `Guten Tag ${firstName},\n\nvielen Dank fuer Ihre Anfrage.\nWir melden uns innerhalb von 24 Stunden.\n\nFreundliche Gruesse\nIhr Tawano-Team`,

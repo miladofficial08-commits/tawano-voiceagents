@@ -1,11 +1,13 @@
-require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const dotenv = require('dotenv');
+
+dotenv.config();
+dotenv.config({ path: path.join(__dirname, 'customer', '.env'), override: false });
 
 const app = express();
 const port = Number(process.env.PORT || 4000);
@@ -26,7 +28,7 @@ const RETELL_FROM_NUMBER = process.env.RETELL_FROM_NUMBER || '';
 const RETELL_WEBHOOK_SECRET = process.env.RETELL_WEBHOOK_SECRET || '';
 const DEFAULT_TAWANO_AGENT = 'agent_6cada34aac5785c950da3d919b';
 const DEFAULT_KRANKEN_AGENT = 'agent_69344ddb9d60cf9fa9f6a30aa0';
-const DEFAULT_BEAUTY_AGENT  = 'agent_2b923be111a55cac5e2ac3d547';
+const DEFAULT_BEAUTY_AGENT  = 'agent_6cada34aac5785c950da3d919b';
 // Agent IDs per page — set in .env or fall back to one default
 const RETELL_AGENT_IDS = {
   'tawano-general':     process.env.RETELL_AGENT_TAWANO      || DEFAULT_TAWANO_AGENT,
@@ -46,6 +48,8 @@ const callDebugStore = new Map();
 const MAX_ANALYTICS = 10000;
 const analyticsFile = path.join(__dirname, 'data', 'analytics-events.json');
 const analyticsEvents = loadAnalyticsEvents();
+const dashboardResetFile = path.join(__dirname, 'data', 'dashboard-reset.json');
+let dashboardResetAt = loadDashboardResetAt();
 
 if (!smtpHost || !smtpUser || !smtpPass || !notifyEmail) {
   console.error('Missing SMTP credentials. Set SMTP_HOST, SMTP_USER, SMTP_PASS and CONTACT_RECEIVER in .env');
@@ -74,18 +78,103 @@ app.get('/handwerker', (_, res) => res.sendFile(path.join(__dirname, 'handwerker
 app.get('/krankenbefoerderung', (_, res) => res.sendFile(path.join(__dirname, 'krankenbefoerderung.html')));
 app.get('/dashboard', (_, res) => res.sendFile(path.join(__dirname, 'dashboard.html')));
 app.get('/beautyworlds-dashboard', (_, res) => res.sendFile(path.join(__dirname, 'beautyworlds-dashboard.html')));
+app.get('/dashboardkunde', (_, res) => res.sendFile(path.join(__dirname, 'customer', 'Dashboardkunde.html')));
+
+app.post('/api/client-auth/login', async (req, res) => {
+  const supabaseUrl = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+  const email = String((req.body && req.body.email) || '').trim();
+  const password = String((req.body && req.body.password) || '');
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return res.status(500).json({ ok: false, message: 'Supabase env missing on server' });
+  }
+  if (!email || !password) {
+    return res.status(400).json({ ok: false, message: 'email and password are required' });
+  }
+
+  try {
+    const response = await fetch(supabaseUrl + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: {
+        apikey: supabaseAnonKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const raw = await response.text();
+    let data = {};
+    try {
+      data = raw ? JSON.parse(raw) : {};
+    } catch (error) {
+      data = {};
+    }
+
+    if (!response.ok) {
+      const isEmailNotConfirmed = data.error_code === 'email_not_confirmed';
+      return res.status(isEmailNotConfirmed ? 403 : 401).json({
+        ok: false,
+        code: data.error_code || null,
+        message: isEmailNotConfirmed
+          ? 'E-Mail noch nicht bestaetigt. Bitte in Supabase Auth > Users den Nutzer bestaetigen oder E-Mail-Confirm deaktivieren.'
+          : (data.error_description || data.msg || 'Login failed'),
+      });
+    }
+
+    return res.json({
+      ok: true,
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
+      expiresIn: data.expires_in,
+      tokenType: data.token_type,
+      user: data.user ? { id: data.user.id, email: data.user.email } : null,
+    });
+  } catch (error) {
+    return res.status(500).json({ ok: false, message: 'Could not reach Supabase auth' });
+  }
+});
 
 app.get('/health', (_, res) => {
   res.json({ ok: true, smsEnabled: SMS_ENABLED });
 });
 
-app.get('/api/debug/calls', (_, res) => {
+app.get('/api/debug/calls', async (_, res) => {
+  const resetMs = toTimeMs(dashboardResetAt);
+
   const recent = Array.from(callDebugStore.values())
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 25)
+    .filter((r) => !resetMs || toTimeMs(r.createdAt || r.updatedAt) >= resetMs)
+    .slice(0, 50)
     .map(summarizeCallDebug);
 
-  res.json({ ok: true, calls: recent });
+  const history = (await fetchRetellHistoryForLocalDashboard())
+    .filter((r) => !resetMs || toTimeMs(r.createdAt || r.updatedAt) >= resetMs);
+  const merged = new Map();
+  [...history, ...recent].forEach((call) => {
+    const key = String(call.callSid || call.debugId || Math.random());
+    merged.set(key, call);
+  });
+
+  const calls = Array.from(merged.values()).sort((a, b) => {
+    const at = new Date(a.updatedAt || a.createdAt || 0).getTime();
+    const bt = new Date(b.updatedAt || b.createdAt || 0).getTime();
+    return bt - at;
+  });
+
+  res.json({ ok: true, calls: calls.slice(0, 200) });
+});
+
+app.post('/api/debug/reset', (_, res) => {
+  const now = new Date().toISOString();
+  callDebugStore.clear();
+  analyticsEvents.length = 0;
+  dashboardResetAt = now;
+
+  saveAnalyticsEvents();
+  saveDashboardResetAt(now);
+
+  res.json({ ok: true, resetAt: now });
 });
 
 // ── Retell webhook — call lifecycle events ─────────────────────────────────
@@ -176,7 +265,8 @@ app.post('/api/call', async (req, res) => {
   const debugId = createDebugId();
   const createdAt = new Date().toISOString();
 
-  if (!phoneNumber) {
+  const normalizedPhoneNumber = normalizePhoneForRetell(phoneNumber);
+  if (!normalizedPhoneNumber) {
     return res.status(400).json({ ok: false, message: 'phoneNumber is required' });
   }
   if (!RETELL_API_KEY) {
@@ -217,7 +307,7 @@ app.post('/api/call', async (req, res) => {
       body: JSON.stringify({
         override_agent_id: resolvedAgentId,
         from_number: RETELL_FROM_NUMBER,
-        to_number: phoneNumber,
+        to_number: normalizedPhoneNumber,
         metadata: {
           debug_id: debugId,
           website_agent_id: agentId,
@@ -247,6 +337,7 @@ app.post('/api/call', async (req, res) => {
     record.status = data.call_status || 'registered';
     record.updatedAt = new Date().toISOString();
     record.events.push({ at: record.updatedAt, type: 'retell_registered', callSid: data.call_id, status: data.call_status || null });
+    record.phoneNumber = normalizedPhoneNumber;
 
     if (data.call_id) {
       callDebugStore.set(data.call_id, record);
@@ -444,6 +535,18 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+function normalizePhoneForRetell(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  let cleaned = raw.replace(/[\s\-()/.]/g, '');
+  if (cleaned.startsWith('00')) cleaned = '+' + cleaned.slice(2);
+  if (cleaned.startsWith('+')) return /^\+[1-9]\d{7,14}$/.test(cleaned) ? cleaned : '';
+  if (cleaned.startsWith('0')) cleaned = '+49' + cleaned.slice(1);
+  else if (!cleaned.startsWith('49')) cleaned = '+49' + cleaned;
+  else cleaned = '+' + cleaned;
+  return /^\+[1-9]\d{7,14}$/.test(cleaned) ? cleaned : '';
+}
+
 function createDebugId() {
   return typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : crypto.randomBytes(12).toString('hex');
 }
@@ -468,6 +571,90 @@ function summarizeCallDebug(record) {
   };
 }
 
+function parseTenantAgentMap(rawValue) {
+  try {
+    const parsed = JSON.parse(rawValue || '{}');
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function asAgentIdArray(value) {
+  if (Array.isArray(value)) return value.map((v) => String(v || '').trim()).filter(Boolean);
+  if (typeof value === 'string' && value.trim()) return [value.trim()];
+  return [];
+}
+
+function resolveLocalHistoryAgentIds() {
+  const tenantMap = parseTenantAgentMap(process.env.RETELL_TENANT_AGENT_MAP);
+  const historyMap = parseTenantAgentMap(process.env.RETELL_TENANT_HISTORY_AGENT_MAP);
+  const ids = [
+    ...asAgentIdArray(process.env.RETELL_AGENT_BEAUTY),
+    ...asAgentIdArray(tenantMap.tenant_beautyworld),
+    ...asAgentIdArray(historyMap.tenant_beautyworld),
+  ];
+  return [...new Set(ids)];
+}
+
+function retellMsToIso(value) {
+  const n = Number(value || 0);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return new Date(n).toISOString();
+}
+
+function toTimeMs(value) {
+  const ms = new Date(value || 0).getTime();
+  return Number.isFinite(ms) ? ms : 0;
+}
+
+function normalizeRetellHistoryCall(call) {
+  const createdAt = retellMsToIso(call.start_timestamp) || retellMsToIso(call.end_timestamp) || new Date().toISOString();
+  const analysis = call.call_analysis || {};
+  return {
+    debugId: call.call_id || null,
+    callSid: call.call_id || null,
+    phoneNumber: call.to_number || null,
+    requestedAgentId: call.agent_id || null,
+    resolvedAgentId: call.agent_id || null,
+    agent_id: call.agent_id || null,
+    status: call.call_status || null,
+    retellStatus: call.call_status || null,
+    disconnectionReason: call.disconnection_reason || null,
+    createdAt,
+    updatedAt: retellMsToIso(call.end_timestamp) || createdAt,
+    callAnalysis: analysis,
+    summary: analysis.call_summary || null,
+    customerName: call.to_number || call.from_number || null,
+    source: 'retell_history',
+  };
+}
+
+async function fetchRetellHistoryForLocalDashboard() {
+  if (!RETELL_API_KEY) return [];
+  const agentIds = resolveLocalHistoryAgentIds();
+  if (!agentIds.length) return [];
+
+  try {
+    const response = await fetch('https://api.retellai.com/v2/list-calls', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + RETELL_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ limit: 500 }),
+    });
+    if (!response.ok) return [];
+    const payload = await response.json();
+    const calls = Array.isArray(payload) ? payload : [];
+    return calls
+      .filter((call) => agentIds.includes(String(call.agent_id || '')))
+      .map(normalizeRetellHistoryCall);
+  } catch (error) {
+    return [];
+  }
+}
+
 function loadAnalyticsEvents() {
   try {
     if (!fs.existsSync(analyticsFile)) return [];
@@ -486,5 +673,27 @@ function saveAnalyticsEvents() {
     fs.writeFileSync(analyticsFile, JSON.stringify(analyticsEvents.slice(-MAX_ANALYTICS), null, 2), 'utf8');
   } catch (error) {
     console.error('Failed to save analytics events:', error.message);
+  }
+}
+
+function loadDashboardResetAt() {
+  try {
+    if (!fs.existsSync(dashboardResetFile)) return null;
+    const raw = fs.readFileSync(dashboardResetFile, 'utf8');
+    const parsed = JSON.parse(raw || '{}');
+    const value = parsed && typeof parsed.resetAt === 'string' ? parsed.resetAt : null;
+    return value || null;
+  } catch (error) {
+    console.error('Failed to load dashboard reset marker:', error.message);
+    return null;
+  }
+}
+
+function saveDashboardResetAt(resetAt) {
+  try {
+    fs.mkdirSync(path.dirname(dashboardResetFile), { recursive: true });
+    fs.writeFileSync(dashboardResetFile, JSON.stringify({ resetAt }, null, 2), 'utf8');
+  } catch (error) {
+    console.error('Failed to save dashboard reset marker:', error.message);
   }
 }

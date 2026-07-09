@@ -21,6 +21,12 @@
   force = true
 
 [[redirects]]
+  from = "/api/debug/reset"
+  to = "/.netlify/functions/debug-reset"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/analytics"
   to = "/.netlify/functions/analytics"
   status = 200
@@ -38,6 +44,11 @@
   status = 301
 
 [[redirects]]
+  from = "/voice-agents/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
   from = "/handwerker"
   to = "/handwerker.html"
   status = 200
@@ -51,3 +62,23 @@
   from = "/beautyworlds-dashboard"
   to = "/beautyworlds-dashboard.html"
   status = 200
+
+[[redirects]]
+  from = "/dashboardkunde"
+  to = "/customer/Dashboardkunde.html"
+  status = 200
+
+[[redirects]]
+  from = "/api/client-auth/login"
+  to = "/.netlify/functions/client-auth"
+  status = 200
+  force = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"

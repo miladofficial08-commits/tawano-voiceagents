@@ -1,4 +1,6 @@
 const crypto = require('crypto');
+const { buildHeaders } = require('./_auth');
+const { checkRateLimit } = require('./_rate-limit');
 
 // Lazy-load store so a blobs failure never blocks the actual call
 let _store;
@@ -9,13 +11,8 @@ function getStore() {
   return _store;
 }
 
-const headers = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Content-Type': 'application/json',
-};
-
 exports.handler = async (event) => {
+  const headers = buildHeaders(event);
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
   }
@@ -27,7 +24,7 @@ exports.handler = async (event) => {
   const RETELL_FROM_NUMBER = process.env.RETELL_FROM_NUMBER || '';
   const DEFAULT_TAWANO_AGENT = 'agent_6cada34aac5785c950da3d919b';
   const DEFAULT_KRANKEN_AGENT = 'agent_69344ddb9d60cf9fa9f6a30aa0';
-  const DEFAULT_BEAUTY_AGENT = 'agent_2b923be111a55cac5e2ac3d547';
+  const DEFAULT_BEAUTY_AGENT = 'agent_6cada34aac5785c950da3d919b';
   const RETELL_AGENT_IDS = {
     'tawano-general':    process.env.RETELL_AGENT_TAWANO      || DEFAULT_TAWANO_AGENT,
     'handwerker-demo':  process.env.RETELL_AGENT_HANDWERKER  || process.env.RETELL_AGENT_DEFAULT || '',
@@ -35,16 +32,26 @@ exports.handler = async (event) => {
     'beautyworlds-demo': process.env.RETELL_AGENT_BEAUTY     || DEFAULT_BEAUTY_AGENT,
   };
 
+  const rate = checkRateLimit(event, 'call:create', { windowMs: 60 * 1000, maxRequests: 12 });
+  if (!rate.allowed) {
+    return {
+      statusCode: 429,
+      headers: buildHeaders(event, { 'Retry-After': String(rate.retryAfterSec) }),
+      body: JSON.stringify({ ok: false, message: 'Rate limit exceeded. Try again shortly.' }),
+    };
+  }
+
   let body;
   try { body = JSON.parse(event.body || '{}'); } catch(e) { body = {}; }
 
   const { agentId, phoneNumber } = body;
+  const normalizedPhoneNumber = normalizePhoneForRetell(phoneNumber);
   const debugId = typeof crypto.randomUUID === 'function'
     ? crypto.randomUUID()
     : crypto.randomBytes(12).toString('hex');
   const createdAt = new Date().toISOString();
 
-  if (!phoneNumber) {
+  if (!normalizedPhoneNumber) {
     return { statusCode: 400, headers, body: JSON.stringify({ ok: false, message: 'phoneNumber is required' }) };
   }
   if (!RETELL_API_KEY) {
@@ -72,7 +79,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         override_agent_id: resolvedAgentId,
         from_number: RETELL_FROM_NUMBER,
-        to_number: phoneNumber,
+        to_number: normalizedPhoneNumber,
         metadata: {
           debug_id: debugId,
           website_agent_id: agentId || 'unknown',
@@ -80,7 +87,7 @@ exports.handler = async (event) => {
       }),
     });
 
-    const data = await retellRes.json();
+    const data = await parseJsonResponse(retellRes);
 
     if (!retellRes.ok) {
       return { statusCode: 502, headers, body: JSON.stringify({ ok: false, message: data.message || 'Retell call failed' }) };
@@ -96,7 +103,9 @@ exports.handler = async (event) => {
           updatedAt: new Date().toISOString(),
           requestedAgentId: agentId || 'tawano-general',
           resolvedAgentId,
-          phoneNumber,
+          tenantId: 'public',
+          createdByUserId: null,
+          phoneNumber: normalizedPhoneNumber,
           status: data.call_status || 'registered',
           retellStatus: data.call_status || null,
           telephonyIdentifier: data.telephony_identifier || null,
@@ -117,3 +126,24 @@ exports.handler = async (event) => {
     return { statusCode: 500, headers, body: JSON.stringify({ ok: false, message: 'Could not reach Retell API' }) };
   }
 };
+
+function normalizePhoneForRetell(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  let cleaned = raw.replace(/[\s\-()/.]/g, '');
+  if (cleaned.startsWith('00')) cleaned = '+' + cleaned.slice(2);
+  if (cleaned.startsWith('+')) return /^\+[1-9]\d{7,14}$/.test(cleaned) ? cleaned : '';
+  if (cleaned.startsWith('0')) cleaned = '+49' + cleaned.slice(1);
+  else if (!cleaned.startsWith('49')) cleaned = '+49' + cleaned;
+  else cleaned = '+' + cleaned;
+  return /^\+[1-9]\d{7,14}$/.test(cleaned) ? cleaned : '';
+}
+
+async function parseJsonResponse(response) {
+  const text = await response.text();
+  try {
+    return text ? JSON.parse(text) : {};
+  } catch (error) {
+    return { message: 'Retell returned a non-JSON response', raw: text.slice(0, 200) };
+  }
+}

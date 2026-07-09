@@ -5,6 +5,7 @@
   "type": "commonjs",
   "scripts": {
     "dev": "node booking-server.js",
+    "dev:secure": "npx netlify dev",
     "start": "node booking-server.js"
   },
   "dependencies": {

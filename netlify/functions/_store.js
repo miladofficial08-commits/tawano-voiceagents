@@ -16,6 +16,22 @@ async function readArray(key) {
   return Array.isArray(data) ? data : [];
 }
 
+async function writeArray(key, list) {
+  const safe = Array.isArray(list) ? list : [];
+  await STORE.setJSON(key, safe);
+  return safe;
+}
+
+async function readValue(key, fallback = null) {
+  const data = await STORE.get(key, { type: 'json' });
+  return data == null ? fallback : data;
+}
+
+async function writeValue(key, value) {
+  await STORE.setJSON(key, value);
+  return value;
+}
+
 async function appendLimited(key, item, maxSize) {
   const list = await readArray(key);
   list.push(item);
@@ -30,5 +46,8 @@ module.exports = {
   KEYS,
   LIMITS,
   readArray,
+  writeArray,
+  readValue,
+  writeValue,
   appendLimited,
 };
